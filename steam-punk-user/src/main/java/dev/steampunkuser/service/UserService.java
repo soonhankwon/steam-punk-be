@@ -4,8 +4,10 @@ import dev.steampunkuser.common.enumtype.ErrorCode;
 import dev.steampunkuser.common.exception.ApiException;
 import dev.steampunkuser.domain.User;
 import dev.steampunkuser.dto.request.UserAddRequest;
+import dev.steampunkuser.dto.request.UserPasswordUpdateRequest;
 import dev.steampunkuser.dto.request.UserPhoneNumberUpdateRequest;
 import dev.steampunkuser.dto.response.UserAddResponse;
+import dev.steampunkuser.dto.response.UserPasswordUpdateResponse;
 import dev.steampunkuser.dto.response.UserPhoneNumberUpdateResponse;
 import dev.steampunkuser.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,5 +36,13 @@ public class UserService {
 
         user.updatePhoneNumber(request);
         return UserPhoneNumberUpdateResponse.from(user);
+    }
+
+    @Transactional
+    public UserPasswordUpdateResponse updatePassword(UserPasswordUpdateRequest request) {
+        User user = userRepository.findById(request.userId())
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_USER_ID));
+        user.updatePassword(request, passwordEncoder::encode);
+        return UserPasswordUpdateResponse.success();
     }
 }
