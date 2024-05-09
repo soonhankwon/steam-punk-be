@@ -29,7 +29,7 @@ public class UserController {
                 .body(res);
     }
 
-    @PatchMapping("/phone")
+    @PatchMapping("/phones")
     public ResponseEntity<UserPhoneNumberUpdateResponse> updatePhoneNumber(
             @RequestBody UserPhoneNumberUpdateRequest request) {
         UserPhoneNumberUpdateResponse res = userService.updatePhoneNumber(request);
