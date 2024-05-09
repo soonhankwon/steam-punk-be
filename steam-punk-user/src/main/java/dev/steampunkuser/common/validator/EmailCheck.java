@@ -1,4 +1,4 @@
-package dev.steampunkuser.common.util;
+package dev.steampunkuser.common.validator;
 
 import jakarta.validation.Constraint;
 import java.lang.annotation.ElementType;

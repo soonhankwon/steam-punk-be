@@ -1,4 +1,4 @@
-package dev.steampunkuser.common.util;
+package dev.steampunkuser.common.validator;
 
 import dev.steampunkuser.common.enumtype.ErrorCode;
 import dev.steampunkuser.common.exception.ApiException;
