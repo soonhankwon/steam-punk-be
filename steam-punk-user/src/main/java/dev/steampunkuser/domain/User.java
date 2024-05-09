@@ -1,13 +1,16 @@
 package dev.steampunkuser.domain;
 
+import dev.steampunkuser.common.converter.AES256ToStringConverter;
 import dev.steampunkuser.common.entity.BaseTimeEntity;
 import dev.steampunkuser.dto.request.UserAddRequest;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.function.Function;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,12 +26,14 @@ public class User extends BaseTimeEntity {
     @Column(name = "user_id")
     private Long id;
 
+    @Convert(converter = AES256ToStringConverter.class)
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Convert(converter = AES256ToStringConverter.class)
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
@@ -38,10 +43,10 @@ public class User extends BaseTimeEntity {
         this.phoneNumber = phoneNumber;
     }
 
-    public static User from(UserAddRequest request) {
+    public static User from(UserAddRequest request, Function<String, String> encodedFunction) {
         return new User(
                 request.email(),
-                request.password(),
+                encodedFunction.apply(request.email()),
                 request.phoneNumber()
         );
     }
