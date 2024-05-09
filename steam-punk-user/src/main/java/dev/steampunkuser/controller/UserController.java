@@ -3,6 +3,7 @@ package dev.steampunkuser.controller;
 import dev.steampunkuser.dto.request.UserAddRequest;
 import dev.steampunkuser.dto.response.UserAddResponse;
 import dev.steampunkuser.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserAddResponse> addUser(@RequestBody UserAddRequest request) {
+    public ResponseEntity<UserAddResponse> addUser(@Valid @RequestBody UserAddRequest request) {
         UserAddResponse res = userService.addUser(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(res);
