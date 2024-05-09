@@ -7,9 +7,11 @@ import dev.steampunkuser.dto.request.UserAddRequest;
 import dev.steampunkuser.dto.request.UserPasswordUpdateRequest;
 import dev.steampunkuser.dto.request.UserPhoneNumberUpdateRequest;
 import dev.steampunkuser.dto.response.UserAddResponse;
+import dev.steampunkuser.dto.response.UserGetResponse;
 import dev.steampunkuser.dto.response.UserPasswordUpdateResponse;
 import dev.steampunkuser.dto.response.UserPhoneNumberUpdateResponse;
 import dev.steampunkuser.repository.UserRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,5 +46,15 @@ public class UserService {
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_USER_ID));
         user.updatePassword(request, passwordEncoder::encode);
         return UserPasswordUpdateResponse.success();
+    }
+
+    @Transactional(readOnly = true)
+    public UserGetResponse findUser(String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+            return UserGetResponse.invalid();
+        }
+        User user = optionalUser.get();
+        return UserGetResponse.valid(user);
     }
 }
