@@ -1,1 +1,3 @@
 rootProject.name = 'steam-punk-be'
+include 'steam-punk-api'
+include 'steam-punk-user'
