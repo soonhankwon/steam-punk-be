@@ -1,5 +1,7 @@
 package dev.steampunkuser.domain;
 
+import dev.steampunkuser.common.entity.BaseTimeEntity;
+import dev.steampunkuser.dto.request.UserAddRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "`user`")
-public class User {
+public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,4 +31,18 @@ public class User {
 
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
+
+    private User(String email, String password, String phoneNumber) {
+        this.email = email;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+    }
+
+    public static User from(UserAddRequest request) {
+        return new User(
+                request.email(),
+                request.password(),
+                request.phoneNumber()
+        );
+    }
 }
