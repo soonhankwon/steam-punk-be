@@ -1,8 +1,10 @@
 package dev.steampunkuser.controller;
 
 import dev.steampunkuser.dto.request.UserAddRequest;
+import dev.steampunkuser.dto.request.UserPasswordUpdateRequest;
 import dev.steampunkuser.dto.request.UserPhoneNumberUpdateRequest;
 import dev.steampunkuser.dto.response.UserAddResponse;
+import dev.steampunkuser.dto.response.UserPasswordUpdateResponse;
 import dev.steampunkuser.dto.response.UserPhoneNumberUpdateResponse;
 import dev.steampunkuser.service.UserService;
 import jakarta.validation.Valid;
@@ -33,6 +35,13 @@ public class UserController {
     public ResponseEntity<UserPhoneNumberUpdateResponse> updatePhoneNumber(
             @RequestBody UserPhoneNumberUpdateRequest request) {
         UserPhoneNumberUpdateResponse res = userService.updatePhoneNumber(request);
+        return ResponseEntity.ok(res);
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<UserPasswordUpdateResponse> updatePassword(
+            @RequestBody UserPasswordUpdateRequest request) {
+        UserPasswordUpdateResponse res = userService.updatePassword(request);
         return ResponseEntity.ok(res);
     }
 }
