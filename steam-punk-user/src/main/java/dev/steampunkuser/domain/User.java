@@ -3,6 +3,7 @@ package dev.steampunkuser.domain;
 import dev.steampunkuser.common.converter.AES256ToStringConverter;
 import dev.steampunkuser.common.entity.BaseTimeEntity;
 import dev.steampunkuser.dto.request.UserAddRequest;
+import dev.steampunkuser.dto.request.UserPhoneNumberUpdateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -49,5 +50,9 @@ public class User extends BaseTimeEntity {
                 encodedFunction.apply(request.email()),
                 request.phoneNumber()
         );
+    }
+
+    public void updatePhoneNumber(UserPhoneNumberUpdateRequest request) {
+        this.phoneNumber = request.phoneNumber();
     }
 }
