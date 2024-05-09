@@ -17,7 +17,7 @@ public class CustomExceptionAdvice {
         log.warn(
                 String.format(
                         "http-status={%d} msg={%s}",
-                        exception.getHttpStatus().value(), errorCode.getMessage()
+                        errorCode.getHttpStatus().value(), errorCode.getMessage()
                 )
         );
         ErrorResponse res = ErrorResponse.from(exception);
