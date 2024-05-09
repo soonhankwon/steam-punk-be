@@ -48,7 +48,7 @@ public class User extends BaseTimeEntity {
     public static User from(UserAddRequest request, Function<String, String> encodedFunction) {
         return new User(
                 request.email(),
-                encodedFunction.apply(request.email()),
+                encodedFunction.apply(request.password()),
                 request.phoneNumber()
         );
     }
