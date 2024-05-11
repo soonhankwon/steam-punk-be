@@ -1,6 +1,5 @@
 package dev.steampunkproductbatch.domain;
 
-import dev.steampunkproductbatch.dto.ProductRawInfo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,19 +25,17 @@ public class Product {
     private Double price;
     @Column(columnDefinition = "TEXT")
     private String shortDescription;
+    private String headerImage;
     private String webSite;
     private String developer;
 
-    public Product(String name, Double price, String shortDescription, String webSite, String developer) {
+    public Product(String name, Double price, String shortDescription, String headerImage, String webSite,
+                   String developer) {
         this.name = name;
         this.price = price;
         this.shortDescription = shortDescription;
+        this.headerImage = headerImage;
         this.webSite = webSite;
         this.developer = developer;
-    }
-
-    public Product(ProductRawInfo data) {
-        this.name = data.name();
-        this.price = data.price();
     }
 }
