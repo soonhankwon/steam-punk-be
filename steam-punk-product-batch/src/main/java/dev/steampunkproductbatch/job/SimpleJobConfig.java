@@ -10,11 +10,11 @@ import dev.steampunkproductbatch.respository.ProductCategoryRepository;
 import dev.steampunkproductbatch.respository.ProductRepository;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -38,7 +38,7 @@ public class SimpleJobConfig {
     private final CategoryRepository categoryRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final Set<String> set = new HashSet<>();
-    private final Map<String, Long> internalCache = new HashMap<>();
+    private final Map<String, Long> internalCache = new ConcurrentHashMap<>();
 
     @Bean
     public Job simpleJob(PlatformTransactionManager transactionManager, JobRepository jobRepository) {
@@ -146,6 +146,7 @@ public class SimpleJobConfig {
                 String name = gameNode.get("name").asText();
                 double price = gameNode.get("price").asDouble();
                 String shortDescription = gameNode.get("short_description").asText();
+                String headerImage = gameNode.get("header_image").asText();
                 String webSite = gameNode.get("website").asText();
                 JsonNode developersJsonNode = gameNode.get("developers");
                 String developer;
@@ -155,8 +156,8 @@ public class SimpleJobConfig {
                     developer = developersJsonNode.get(0).asText();
                 }
                 JsonNode genresJsonNode = gameNode.get("genres");
-                Product product = new Product(name, price, shortDescription, webSite, developer);
-                productRepository.save(new Product(name, price, shortDescription, webSite, developer));
+                Product product = new Product(name, price, shortDescription, headerImage, webSite, developer);
+                productRepository.save(product);
 
                 if (genresJsonNode != null && !genresJsonNode.isEmpty()) {
                     Iterator<JsonNode> iterator = genresJsonNode.iterator();
