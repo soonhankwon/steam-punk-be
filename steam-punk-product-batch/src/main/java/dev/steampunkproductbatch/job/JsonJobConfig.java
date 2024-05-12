@@ -27,8 +27,10 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.boot.task.ThreadPoolTaskExecutorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Slf4j
@@ -131,6 +133,17 @@ public class JsonJobConfig {
                 .<Product, Product>chunk(CHUNK_SIZE, transactionManager)
                 .reader(jsonProductItemReader())
                 .writer(jpaProductItemWriter())
+                .taskExecutor(taskExecutor())
+                .build();
+    }
+
+    @Bean
+    public TaskExecutor taskExecutor() {
+        return new ThreadPoolTaskExecutorBuilder()
+                .corePoolSize(10)
+                .maxPoolSize(10)
+                .queueCapacity(100)
+                .threadNamePrefix("multi-thread-")
                 .build();
     }
 
