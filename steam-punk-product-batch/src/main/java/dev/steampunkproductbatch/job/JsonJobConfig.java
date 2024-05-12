@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -60,6 +61,8 @@ public class JsonJobConfig {
                 .build();
     }
 
+    @Bean
+    @StepScope
     public Tasklet readJsonCollectDistinctCategoriesTasklet() {
         return ((contribution, chunkContext) -> {
             readJsonCollectDistinctCategories();
@@ -102,6 +105,8 @@ public class JsonJobConfig {
                 .build();
     }
 
+    @Bean
+    @StepScope
     public Tasklet addCategoriesTasklet() {
         return ((contribution, chunkContext) -> {
             addCategories();
@@ -118,6 +123,7 @@ public class JsonJobConfig {
     }
 
     @Bean
+    @JobScope
     public Step jsonConvertAndAddDatabaseJobStep(PlatformTransactionManager transactionManager,
                                                  JobRepository jobRepository)
             throws IOException {
@@ -129,12 +135,14 @@ public class JsonJobConfig {
     }
 
     @Bean
+    @StepScope
     public ItemReader<Product> jsonProductItemReader() throws IOException {
         return new JsonProductItemReader(
                 "/Users/soon/Downloads/archive/games.json", internalCacheStore);
     }
 
     @Bean
+    @StepScope
     public JpaItemWriter<Product> jpaProductItemWriter() {
         JpaItemWriter<Product> jpaItemWriter = new JpaItemWriter<>();
         jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
