@@ -26,7 +26,7 @@ public class JsonProductItemReader implements ItemReader<Product> {
     }
 
     @Override
-    public Product read() throws UnexpectedInputException, ParseException, NonTransientResourceException {
+    public synchronized Product read() throws UnexpectedInputException, ParseException, NonTransientResourceException {
         if (productIterator != null && productIterator.hasNext()) {
             JsonNode node = productIterator.next();
             String name = node.get("name").asText();
