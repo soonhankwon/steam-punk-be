@@ -1,5 +1,6 @@
 package dev.steampunkproduct.controller;
 
+import dev.steampunkproduct.dto.response.ProductExistsCheckResponse;
 import dev.steampunkproduct.dto.response.ProductGetResponse;
 import dev.steampunkproduct.service.ProductService;
 import java.util.List;
@@ -21,6 +22,12 @@ public class ProductController {
     @GetMapping("{productId}")
     public ResponseEntity<ProductGetResponse> getProduct(@PathVariable Long productId) {
         ProductGetResponse res = productService.getProduct(productId);
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("{productId}/check")
+    public ResponseEntity<ProductExistsCheckResponse> checkProductExists(@PathVariable Long productId) {
+        ProductExistsCheckResponse res = productService.checkProductExists(productId);
         return ResponseEntity.ok(res);
     }
 
