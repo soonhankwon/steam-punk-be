@@ -26,7 +26,7 @@ public class UserService {
 
     @Transactional
     public UserAddResponse addUser(UserAddRequest request) {
-        User user = User.from(request, passwordEncoder::encode);
+        User user = User.of(request, passwordEncoder::encode);
         user = userRepository.save(user);
         return UserAddResponse.from(user);
     }
