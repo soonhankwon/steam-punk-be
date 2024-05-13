@@ -4,8 +4,10 @@ import dev.steampunkorder.common.enumtype.ErrorCode;
 import dev.steampunkorder.common.exception.ApiException;
 import dev.steampunkorder.domain.WishList;
 import dev.steampunkorder.dto.request.WishListAddRequest;
+import dev.steampunkorder.dto.request.WishListDeleteRequest;
 import dev.steampunkorder.dto.response.ProductsExistsCheckResponse;
 import dev.steampunkorder.dto.response.WishListAddResponse;
+import dev.steampunkorder.dto.response.WishListDeleteResponse;
 import dev.steampunkorder.dto.response.WishListGetResponse;
 import dev.steampunkorder.repository.WishListRepository;
 import java.util.List;
@@ -51,5 +53,13 @@ public class WishListService {
                 .toList();
 
         return WishListGetResponse.of(userId, productIds);
+    }
+
+    @Transactional
+    public WishListDeleteResponse deleteWishList(WishListDeleteRequest request) {
+        WishList wishList = wishListRepository.findByUserIdAndProductId(request.userId(), request.productId())
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXIST_PRODUCT_ID_BY_USER));
+        wishListRepository.delete(wishList);
+        return WishListDeleteResponse.ofSuccess();
     }
 }
