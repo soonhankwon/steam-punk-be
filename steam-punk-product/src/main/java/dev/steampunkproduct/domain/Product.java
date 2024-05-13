@@ -21,9 +21,21 @@ public class Product {
     @Column(name = "product_id")
     private Long id;
 
+    @Column(name = "name", nullable = false)
     private String name;
 
-    private Long price;
+    @Column(name = "price", nullable = false)
+    private Double price;
 
-    private String description;
+    @Column(columnDefinition = "TEXT")
+    private String shortDescription;
+
+    @Column(name = "header_image")
+    private String headerImage;
+
+    @Column(name = "web_site")
+    private String webSite;
+
+    @Column(name = "developer")
+    private String developer;
 }
