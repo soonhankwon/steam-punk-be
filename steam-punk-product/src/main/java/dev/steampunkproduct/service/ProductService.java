@@ -1,6 +1,9 @@
 package dev.steampunkproduct.service;
 
+import dev.steampunkproduct.common.enumtype.ErrorCode;
+import dev.steampunkproduct.common.exception.ApiException;
 import dev.steampunkproduct.domain.Product;
+import dev.steampunkproduct.dto.response.ProductExistsCheckResponse;
 import dev.steampunkproduct.dto.response.ProductGetResponse;
 import dev.steampunkproduct.repository.ProductRepository;
 import java.util.List;
@@ -20,7 +23,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductGetResponse getProduct(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("no product Id"));
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXIST_PRODUCT_ID));
         return ProductGetResponse.from(product);
     }
 
@@ -31,5 +34,11 @@ public class ProductService {
                 .stream()
                 .map(ProductGetResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public ProductExistsCheckResponse checkProductExists(Long productId) {
+        boolean isExists = productRepository.existsById(productId);
+        return ProductExistsCheckResponse.from(isExists);
     }
 }
