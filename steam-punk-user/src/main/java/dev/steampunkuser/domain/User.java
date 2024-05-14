@@ -70,11 +70,22 @@ public class User extends BaseTimeEntity {
         this.password = encodedFunction.apply(request.password());
     }
 
-    public void updatePoint(UserPointUpdateRequest request) {
-        //TODO validation 으로 예외처리 코드 이동
-        if (request.point() < MIN_POINT) {
-            throw new ApiException(ErrorCode.TOO_LOW_POINT);
+    public void decreasePoint(UserPointUpdateRequest request) {
+        Long requestPoint = request.point();
+        if (requestPoint < 0) {
+            throw new IllegalArgumentException("음수는 허용되지 않습니다.");
         }
-        this.point = request.point();
+        if (requestPoint > this.point) {
+            throw new ApiException(ErrorCode.NOT_ENOUGH_POINT);
+        }
+        this.point -= requestPoint;
+    }
+
+    public void increasePoint(UserPointUpdateRequest request) {
+        Long requestPoint = request.point();
+        if (requestPoint < 0) {
+            throw new IllegalArgumentException("음수는 허용되지 않습니다.");
+        }
+        this.point += requestPoint;
     }
 }
