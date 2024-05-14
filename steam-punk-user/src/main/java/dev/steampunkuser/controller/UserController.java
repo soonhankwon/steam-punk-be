@@ -3,11 +3,13 @@ package dev.steampunkuser.controller;
 import dev.steampunkuser.dto.request.UserAddRequest;
 import dev.steampunkuser.dto.request.UserPasswordUpdateRequest;
 import dev.steampunkuser.dto.request.UserPhoneNumberUpdateRequest;
+import dev.steampunkuser.dto.request.UserPointUpdateRequest;
 import dev.steampunkuser.dto.response.UserAddResponse;
 import dev.steampunkuser.dto.response.UserGetResponse;
 import dev.steampunkuser.dto.response.UserPasswordUpdateResponse;
 import dev.steampunkuser.dto.response.UserPhoneNumberUpdateResponse;
 import dev.steampunkuser.dto.response.UserPointGetResponse;
+import dev.steampunkuser.dto.response.UserPointUpdateResponse;
 import dev.steampunkuser.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +46,13 @@ public class UserController {
     @GetMapping("/point/{userId}")
     public ResponseEntity<UserPointGetResponse> getUserPoint(@PathVariable Long userId) {
         UserPointGetResponse res = userService.findUserPoint(userId);
+        return ResponseEntity.ok().body(res);
+    }
+
+    @PatchMapping("/point/{userId}")
+    public ResponseEntity<UserPointUpdateResponse> updateUserPoint(@PathVariable Long userId,
+                                                                   @RequestBody UserPointUpdateRequest request) {
+        UserPointUpdateResponse res = userService.updateUserPoint(userId, request);
         return ResponseEntity.ok().body(res);
     }
 
