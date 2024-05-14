@@ -2,9 +2,12 @@ package dev.steampunkuser.domain;
 
 import dev.steampunkuser.common.converter.AES256ToStringConverter;
 import dev.steampunkuser.common.entity.BaseTimeEntity;
+import dev.steampunkuser.common.enumtype.ErrorCode;
+import dev.steampunkuser.common.exception.ApiException;
 import dev.steampunkuser.dto.request.UserAddRequest;
 import dev.steampunkuser.dto.request.UserPasswordUpdateRequest;
 import dev.steampunkuser.dto.request.UserPhoneNumberUpdateRequest;
+import dev.steampunkuser.dto.request.UserPointUpdateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -65,5 +68,13 @@ public class User extends BaseTimeEntity {
 
     public void updatePassword(UserPasswordUpdateRequest request, Function<String, String> encodedFunction) {
         this.password = encodedFunction.apply(request.password());
+    }
+
+    public void updatePoint(UserPointUpdateRequest request) {
+        //TODO validation 으로 예외처리 코드 이동
+        if (request.point() < MIN_POINT) {
+            throw new ApiException(ErrorCode.TOO_LOW_POINT);
+        }
+        this.point = request.point();
     }
 }
