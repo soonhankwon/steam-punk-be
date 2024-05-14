@@ -13,8 +13,7 @@ public enum ErrorCode {
     ENCRYPTION_FAILED(HttpStatus.BAD_REQUEST, "암호화가 실패했습니다."),
     CRYPTOGRAPHY_FAILED(HttpStatus.BAD_REQUEST, "암복호화가 실패했습니다."),
     NOT_EXISTS_USER_ID(HttpStatus.BAD_REQUEST, "유저아이디가 존재하지 않습니다."),
-    TOO_LOW_POINT(HttpStatus.BAD_REQUEST, "포인트는 0이상이어야 합니다.");
-
+    NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "포인트가 충분하지 않습니다.");
     private final HttpStatus httpStatus;
     private final String message;
 }
