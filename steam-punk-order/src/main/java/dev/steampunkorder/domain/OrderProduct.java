@@ -1,6 +1,7 @@
 package dev.steampunkorder.domain;
 
 
+import dev.steampunkorder.common.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "order_product")
-public class OrderProduct {
+public class OrderProduct extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +28,9 @@ public class OrderProduct {
 
     @Column(name = "product_id")
     private Long productId;
+
+    public OrderProduct(Long orderId, Long productId) {
+        this.orderId = orderId;
+        this.productId = productId;
+    }
 }
