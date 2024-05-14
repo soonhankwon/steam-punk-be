@@ -54,13 +54,15 @@ public class OrderService {
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_ORDER_ID));
 
         AtomicReference<Long> totalPrice = new AtomicReference<>(0L);
+        List<Long> orderProductIds = new ArrayList<>();
         orderProductRepository.findAllByOrderId(orderId)
                 .forEach(orderProduct -> {
                     ProductInfo productInfo = getProductInfo(orderProduct.getProductId());
+                    orderProductIds.add(orderProduct.getProductId());
                     totalPrice.updateAndGet(v -> v + productInfo.price());
                 });
 
-        return OrderGetResponse.of(order, totalPrice.get());
+        return OrderGetResponse.of(order, totalPrice.get(), orderProductIds);
     }
 
     @Transactional
