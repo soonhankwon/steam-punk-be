@@ -42,4 +42,11 @@ public class Order extends BaseTimeEntity {
                 OrderState.ORDER_PENDING
         );
     }
+
+    public void updateState(OrderState orderState) {
+        if (this.orderState == orderState) {
+            return;
+        }
+        this.orderState = orderState;
+    }
 }
