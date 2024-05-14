@@ -6,6 +6,8 @@ import dev.steampunkpayment.common.exception.ApiException;
 import dev.steampunkpayment.dto.request.PaymentAddRequest;
 
 public record OrderInfo(
+        @JsonProperty("order_id")
+        Long orderId,
         @JsonProperty("user_id")
         Long userId,
         @JsonProperty("total_price")
