@@ -10,6 +10,7 @@ import dev.steampunkuser.dto.response.UserAddResponse;
 import dev.steampunkuser.dto.response.UserGetResponse;
 import dev.steampunkuser.dto.response.UserPasswordUpdateResponse;
 import dev.steampunkuser.dto.response.UserPhoneNumberUpdateResponse;
+import dev.steampunkuser.dto.response.UserPointGetResponse;
 import dev.steampunkuser.repository.UserRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +57,12 @@ public class UserService {
         }
         User user = optionalUser.get();
         return UserGetResponse.valid(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserPointGetResponse findUserPoint(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_USER_ID));
+        return UserPointGetResponse.from(user);
     }
 }
