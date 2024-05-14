@@ -49,10 +49,17 @@ public class UserController {
         return ResponseEntity.ok().body(res);
     }
 
-    @PatchMapping("/point/{userId}")
-    public ResponseEntity<UserPointUpdateResponse> updateUserPoint(@PathVariable Long userId,
-                                                                   @RequestBody UserPointUpdateRequest request) {
-        UserPointUpdateResponse res = userService.updateUserPoint(userId, request);
+    @PatchMapping("/point/{userId}/decrease")
+    public ResponseEntity<UserPointUpdateResponse> decreaseUserPoint(@PathVariable Long userId,
+                                                                     @RequestBody UserPointUpdateRequest request) {
+        UserPointUpdateResponse res = userService.decreaseUserPoint(userId, request);
+        return ResponseEntity.ok().body(res);
+    }
+
+    @PatchMapping("/point/{userId}/increase")
+    public ResponseEntity<UserPointUpdateResponse> increaseUserPoint(@PathVariable Long userId,
+                                                                     @RequestBody UserPointUpdateRequest request) {
+        UserPointUpdateResponse res = userService.increaseUserPoint(userId, request);
         return ResponseEntity.ok().body(res);
     }
 
