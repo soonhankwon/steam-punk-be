@@ -1,12 +1,16 @@
 package dev.steampunkpayment.service;
 
+import dev.steampunkpayment.common.enumtype.ErrorCode;
+import dev.steampunkpayment.common.exception.ApiException;
 import dev.steampunkpayment.domain.OrderInfo;
 import dev.steampunkpayment.domain.Payment;
 import dev.steampunkpayment.domain.UserPointInfo;
 import dev.steampunkpayment.dto.request.PaymentAddRequest;
 import dev.steampunkpayment.dto.response.PaymentAddResponse;
+import dev.steampunkpayment.event.publish.PaymentCompletedEvent;
 import dev.steampunkpayment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -16,9 +20,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public PaymentAddResponse addPayment(PaymentAddRequest request) {
+        if (paymentRepository.existsByOrderId(request.orderId())) {
+            throw new ApiException(ErrorCode.EXISTS_PAYMENT_HISTORY_BY_ORDER_ID);
+        }
         OrderInfo orderInfo = getOrderInfo(request);
         // 유저의 주문인지 밸리데이션
         orderInfo.validate(request);
@@ -29,6 +37,7 @@ public class PaymentService {
 
         Payment payment = Payment.of(request, orderInfo);
         payment = paymentRepository.save(payment);
+        eventPublisher.publishEvent(PaymentCompletedEvent.from(orderInfo));
         return PaymentAddResponse.from(payment);
     }
 
