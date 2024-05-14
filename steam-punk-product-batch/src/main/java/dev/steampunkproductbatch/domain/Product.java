@@ -1,8 +1,11 @@
 package dev.steampunkproductbatch.domain;
 
+import dev.steampunkproductbatch.enumtype.DiscountState;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,7 +27,6 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
     private Long id;
-
     private String name;
     private Double price;
     @Column(columnDefinition = "TEXT")
@@ -32,6 +34,8 @@ public class Product {
     private String headerImage;
     private String webSite;
     private String developer;
+    @Enumerated(EnumType.STRING)
+    private DiscountState discountState;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private final List<ProductCategory> productCategories = new ArrayList<>();
@@ -44,5 +48,6 @@ public class Product {
         this.headerImage = headerImage;
         this.webSite = webSite;
         this.developer = developer;
+        this.discountState = DiscountState.REGULAR;
     }
 }
