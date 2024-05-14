@@ -69,11 +69,20 @@ public class UserService {
     }
 
     @Transactional
-    public UserPointUpdateResponse updateUserPoint(Long userId, UserPointUpdateRequest request) {
+    public UserPointUpdateResponse increaseUserPoint(Long userId, UserPointUpdateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_USER_ID));
 
-        user.updatePoint(request);
+        user.increasePoint(request);
+        return UserPointUpdateResponse.from(user);
+    }
+
+    @Transactional
+    public UserPointUpdateResponse decreaseUserPoint(Long userId, UserPointUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_USER_ID));
+
+        user.decreasePoint(request);
         return UserPointUpdateResponse.from(user);
     }
 }
