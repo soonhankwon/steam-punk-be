@@ -6,8 +6,10 @@ import dev.steampunkorder.domain.Order;
 import dev.steampunkorder.domain.OrderProduct;
 import dev.steampunkorder.domain.ProductInfo;
 import dev.steampunkorder.dto.request.OrderAddRequest;
+import dev.steampunkorder.dto.request.OrderUpdateRequest;
 import dev.steampunkorder.dto.response.OrderAddResponse;
 import dev.steampunkorder.dto.response.OrderGetResponse;
+import dev.steampunkorder.dto.response.OrderUpdateResponse;
 import dev.steampunkorder.repository.OrderProductRepository;
 import dev.steampunkorder.repository.OrderRepository;
 import java.util.ArrayList;
@@ -59,6 +61,14 @@ public class OrderService {
                 });
 
         return OrderGetResponse.of(order, totalPrice.get());
+    }
+
+    @Transactional
+    public OrderUpdateResponse updateOrder(Long orderId, OrderUpdateRequest request) {
+        Order order = orderRepository.findByIdAndUserId(orderId, request.userId())
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_ORDER_ID_BY_USER));
+        order.updateState(request.orderState());
+        return OrderUpdateResponse.from(order);
     }
 
     private ProductInfo getProductInfo(Long productId) {
