@@ -1,13 +1,16 @@
 package dev.steampunkorder.controller;
 
 import dev.steampunkorder.dto.request.OrderAddRequest;
+import dev.steampunkorder.dto.request.OrderUpdateRequest;
 import dev.steampunkorder.dto.response.OrderAddResponse;
 import dev.steampunkorder.dto.response.OrderGetResponse;
+import dev.steampunkorder.dto.response.OrderUpdateResponse;
 import dev.steampunkorder.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +34,13 @@ public class OrderController {
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderGetResponse> getOrder(@PathVariable Long orderId) {
         OrderGetResponse res = orderService.findOrder(orderId);
+        return ResponseEntity.ok().body(res);
+    }
+
+    @PatchMapping("/{orderId}")
+    public ResponseEntity<OrderUpdateResponse> updateOrder(@PathVariable Long orderId,
+                                                           @RequestBody OrderUpdateRequest request) {
+        OrderUpdateResponse res = orderService.updateOrder(orderId, request);
         return ResponseEntity.ok().body(res);
     }
 }
