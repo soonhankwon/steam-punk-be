@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.steampunkpayment.common.enumtype.ErrorCode;
 import dev.steampunkpayment.common.exception.ApiException;
 import dev.steampunkpayment.dto.request.PaymentAddRequest;
+import java.util.List;
 
 public record OrderInfo(
         @JsonProperty("order_id")
@@ -11,7 +12,9 @@ public record OrderInfo(
         @JsonProperty("user_id")
         Long userId,
         @JsonProperty("total_price")
-        Long totalPrice
+        Long totalPrice,
+        @JsonProperty("order_product_ids")
+        List<Long> orderProductIds
 ) {
     public void validate(PaymentAddRequest request) {
         if (!isRequestUserIdEqualsOrderInfoUserId(request)) {
