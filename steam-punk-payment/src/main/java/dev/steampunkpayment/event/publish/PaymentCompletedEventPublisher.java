@@ -2,6 +2,7 @@ package dev.steampunkpayment.event.publish;
 
 import dev.steampunkpayment.domain.OrderInfo;
 import dev.steampunkpayment.dto.request.OrderStateUpdateRequest;
+import dev.steampunkpayment.dto.request.UserGameHistoryAddRequest;
 import dev.steampunkpayment.dto.request.UserPointDecreaseRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -25,6 +26,10 @@ public class PaymentCompletedEventPublisher {
         decreaseUserPoint(userId,
                 UserPointDecreaseRequest.from(orderInfo)
         );
+
+        addUserGameHistory(
+                UserGameHistoryAddRequest.of(userId, orderInfo.orderProductIds())
+        );
     }
 
     private void updateOrderState(Long orderId, OrderStateUpdateRequest request) {
@@ -41,6 +46,16 @@ public class PaymentCompletedEventPublisher {
         WebClient.create()
                 .patch()
                 .uri("http://localhost:8080/api/v1/users/point/" + userId + "/decrease")
+                .bodyValue(request)
+                .retrieve()
+                .toBodilessEntity()
+                .block();
+    }
+
+    private void addUserGameHistory(UserGameHistoryAddRequest request) {
+        WebClient.create()
+                .post()
+                .uri("http://localhost:8080/api/v1/games")
                 .bodyValue(request)
                 .retrieve()
                 .toBodilessEntity()
