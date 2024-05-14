@@ -7,6 +7,7 @@ import dev.steampunkuser.dto.response.UserAddResponse;
 import dev.steampunkuser.dto.response.UserGetResponse;
 import dev.steampunkuser.dto.response.UserPasswordUpdateResponse;
 import dev.steampunkuser.dto.response.UserPhoneNumberUpdateResponse;
+import dev.steampunkuser.dto.response.UserPointGetResponse;
 import dev.steampunkuser.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,12 @@ public class UserController {
     @GetMapping("/{email}")
     public ResponseEntity<UserGetResponse> getUser(@PathVariable String email) {
         UserGetResponse res = userService.findUser(email);
+        return ResponseEntity.ok().body(res);
+    }
+
+    @GetMapping("/point/{userId}")
+    public ResponseEntity<UserPointGetResponse> getUserPoint(@PathVariable Long userId) {
+        UserPointGetResponse res = userService.findUserPoint(userId);
         return ResponseEntity.ok().body(res);
     }
 
