@@ -29,7 +29,7 @@ public class WishListService {
         }
         ProductsExistsCheckResponse productsExistsCheckResponse = checkProductExists(request);
         if (!productsExistsCheckResponse.isExists()) {
-            throw new ApiException(ErrorCode.NOT_EXIST_PRODUCT_ID);
+            throw new ApiException(ErrorCode.NOT_EXISTS_PRODUCT_ID);
         }
         WishList wishList = WishList.from(request);
         wishList = wishListRepository.save(wishList);
@@ -58,7 +58,7 @@ public class WishListService {
     @Transactional
     public WishListDeleteResponse deleteWishList(WishListDeleteRequest request) {
         WishList wishList = wishListRepository.findByUserIdAndProductId(request.userId(), request.productId())
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXIST_PRODUCT_ID_BY_USER));
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_PRODUCT_ID_BY_USER));
         wishListRepository.delete(wishList);
         return WishListDeleteResponse.ofSuccess();
     }
