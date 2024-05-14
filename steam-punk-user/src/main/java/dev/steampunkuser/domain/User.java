@@ -23,6 +23,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "`user`")
 public class User extends BaseTimeEntity {
 
+    private static final long MIN_POINT = 0L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -39,10 +41,14 @@ public class User extends BaseTimeEntity {
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
+    @Column(name = "point", nullable = false)
+    private Long point;
+
     private User(String email, String password, String phoneNumber) {
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
+        this.point = MIN_POINT;
     }
 
     public static User of(UserAddRequest request, Function<String, String> encodedFunction) {
