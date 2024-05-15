@@ -42,6 +42,10 @@ public class Product {
     private String developer;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "discount_state")
-    private ProductDiscountState productDiscountState;
+    @Column(name = "product_state")
+    private ProductState productState;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discount_policy")
+    private ProductDiscountPolicy productDiscountPolicy;
 }

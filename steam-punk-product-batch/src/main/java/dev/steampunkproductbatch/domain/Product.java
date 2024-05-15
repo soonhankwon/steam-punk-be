@@ -1,6 +1,7 @@
 package dev.steampunkproductbatch.domain;
 
-import dev.steampunkproductbatch.enumtype.DiscountState;
+import dev.steampunkproductbatch.enumtype.DiscountPolicy;
+import dev.steampunkproductbatch.enumtype.ProductState;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,7 +36,9 @@ public class Product {
     private String webSite;
     private String developer;
     @Enumerated(EnumType.STRING)
-    private DiscountState discountState;
+    private DiscountPolicy discountPolicy;
+    @Enumerated(EnumType.STRING)
+    private ProductState productState;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private final List<ProductCategory> productCategories = new ArrayList<>();
@@ -48,6 +51,7 @@ public class Product {
         this.headerImage = headerImage;
         this.webSite = webSite;
         this.developer = developer;
-        this.discountState = DiscountState.REGULAR;
+        this.discountPolicy = DiscountPolicy.REGULAR;
+        this.productState = ProductState.REGULAR;
     }
 }
