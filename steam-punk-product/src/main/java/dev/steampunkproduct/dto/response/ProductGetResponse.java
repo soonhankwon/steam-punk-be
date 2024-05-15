@@ -20,7 +20,7 @@ public record ProductGetResponse(
         return new ProductGetResponse(
                 product.getId(),
                 product.getName(),
-                Math.round(product.getPrice() * 1300),
+                Math.round(product.getPrice() * 1300 * product.getProductDiscountPolicy().getSaleRate()),
                 product.getShortDescription(),
                 product.getHeaderImage(),
                 product.getWebSite(),
