@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum ProductDiscountState {
-
+public enum ProductDiscountPolicy {
+    
     REGULAR(1.0),
     SEVENTY_FIVE_PERCENT_SALE(0.75),
     HALF_SALE(0.5),
