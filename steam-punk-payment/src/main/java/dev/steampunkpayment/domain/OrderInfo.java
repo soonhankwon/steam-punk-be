@@ -13,8 +13,8 @@ public record OrderInfo(
         Long userId,
         @JsonProperty("total_price")
         Long totalPrice,
-        @JsonProperty("order_product_ids")
-        List<Long> orderProductIds
+        @JsonProperty("order_products")
+        List<OrderProductInfo> orderProductInfos
 ) {
     public void validate(PaymentAddRequest request) {
         if (!isRequestUserIdEqualsOrderInfoUserId(request)) {
