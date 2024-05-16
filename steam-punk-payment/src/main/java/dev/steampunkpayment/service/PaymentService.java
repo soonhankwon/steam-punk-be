@@ -7,6 +7,7 @@ import dev.steampunkpayment.domain.Payment;
 import dev.steampunkpayment.domain.UserPointInfo;
 import dev.steampunkpayment.dto.request.PaymentAddRequest;
 import dev.steampunkpayment.dto.response.PaymentAddResponse;
+import dev.steampunkpayment.dto.response.PaymentGetResponse;
 import dev.steampunkpayment.event.publish.PaymentCompletedEvent;
 import dev.steampunkpayment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
@@ -57,5 +58,12 @@ public class PaymentService {
                 .retrieve()
                 .bodyToMono(OrderInfo.class)
                 .block();
+    }
+
+    @Transactional(readOnly = true)
+    public PaymentGetResponse findPayment(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_PAYMENT_ID));
+        return PaymentGetResponse.from(payment);
     }
 }
