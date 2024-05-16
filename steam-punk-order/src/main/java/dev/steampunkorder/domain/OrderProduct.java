@@ -29,8 +29,12 @@ public class OrderProduct extends BaseTimeEntity {
     @Column(name = "product_id")
     private Long productId;
 
-    public OrderProduct(Long orderId, Long productId) {
+    @Column(name = "price")
+    private Long price;
+
+    public OrderProduct(Long orderId, Long productId, Long price) {
         this.orderId = orderId;
         this.productId = productId;
+        this.price = price;
     }
 }
