@@ -4,6 +4,8 @@ import dev.steampunkpayment.common.entity.BaseTimeEntity;
 import dev.steampunkpayment.dto.request.PaymentAddRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,10 +34,14 @@ public class Payment extends BaseTimeEntity {
     @Column(name = "total_price")
     private Long totalPrice;
 
+    @Enumerated(EnumType.STRING)
+    private PaymentState paymentState;
+
     private Payment(Long userId, Long orderId, Long totalPrice) {
         this.userId = userId;
         this.orderId = orderId;
         this.totalPrice = totalPrice;
+        this.paymentState = PaymentState.PAYMENT_COMPLETED;
     }
 
     public static Payment of(PaymentAddRequest request, OrderInfo orderInfo) {
@@ -44,5 +50,13 @@ public class Payment extends BaseTimeEntity {
                 request.orderId(),
                 orderInfo.totalPrice()
         );
+    }
+
+    public void refundInProgress(boolean isPartialRefund) {
+        if (isPartialRefund) {
+            this.paymentState = PaymentState.PAYMENT_PARTIAL_REFUND_IN_PROGRESS;
+            return;
+        }
+        this.paymentState = PaymentState.PAYMENT_REFUND_IN_PROGRESS;
     }
 }
