@@ -19,6 +19,7 @@ import dev.steampunkpayment.repository.PaymentRefundProductRepository;
 import dev.steampunkpayment.repository.PaymentRepository;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -100,10 +101,15 @@ public class PaymentService {
                 .toList();
 
         // 정규 환불 정책 적용 - 환불 조건에 충족되는 상품만 결제 환불 상품에 등록(환불 IN PROCESS)
+        AtomicReference<Long> refundTotalPrice = new AtomicReference<>(0L);
         userGamePlayHistoryInfos.stream()
                 .filter(i -> i.hasRefundCondition(regularRefundPolicy))
-                .forEach(i -> paymentRefundProductRepository.save(
-                        PaymentRefundProduct.of(paymentId, i, paidOrderProductInfoMap.get(i.productId())))
+                .forEach(i -> {
+                            Long refundPrice = paidOrderProductInfoMap.get(i.productId());
+                            refundTotalPrice.updateAndGet(v -> v + refundPrice);
+                            paymentRefundProductRepository.save(
+                                    PaymentRefundProduct.of(paymentId, i, refundPrice));
+                        }
                 );
 
         // 상품중 하나라도 환불 조건에 충족하지 않는다면 결제는 부분 환불 대상 상태
@@ -112,7 +118,7 @@ public class PaymentService {
 
         payment.refundInProgress(isPartialRefund);
         //TODO 환불 신청 후 D+1에 환불 완료(BATCH)
-        return RefundProgressAddResponse.from(payment);
+        return RefundProgressAddResponse.of(refundTotalPrice.get(), payment);
     }
 
     private UserGamePlayHistoryInfo getUserGamePlayHistory(Long userId, Long productId) {
