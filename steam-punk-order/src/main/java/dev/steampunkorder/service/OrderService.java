@@ -10,10 +10,13 @@ import dev.steampunkorder.dto.request.OrderUpdateRequest;
 import dev.steampunkorder.dto.response.OrderAddResponse;
 import dev.steampunkorder.dto.response.OrderGetResponse;
 import dev.steampunkorder.dto.response.OrderUpdateResponse;
+import dev.steampunkorder.enumtype.OrderState;
 import dev.steampunkorder.repository.OrderProductRepository;
 import dev.steampunkorder.repository.OrderRepository;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,7 +35,18 @@ public class OrderService {
         Order order = Order.ofPendingOrder(userId);
         order = orderRepository.save(order);
 
-        //TODO 이전 게임(ProductId) 구매 이력이 있는지 체크로직 필요
+        // 이미 구매한 이력이 있는 상품을 재주문할 수 없음
+        //TODO order & orderProduct 테이블을 조인해서 이미 구매한 상품 ID 리스트를 바로 조회하도록 쿼리 개선 필요
+        List<Order> paidOrders = orderRepository.findByUserIdAndOrderState(userId,
+                OrderState.ORDER_PAYMENT_COMPLETED);
+
+        Set<Long> paidProductIdsSet = new HashSet<>();
+        paidOrders.forEach(o -> {
+            List<OrderProduct> paidOrderProducts = orderProductRepository.findAllByOrderId(o.getId());
+            paidOrderProducts.stream()
+                    .map(OrderProduct::getProductId)
+                    .forEach(paidProductIdsSet::add);
+        });
 
         List<OrderProduct> orderProducts = new ArrayList<>();
         Order finalOrder = order;
@@ -41,6 +55,9 @@ public class OrderService {
                 .stream()
                 .distinct()
                 .forEach(productId -> {
+                    if (paidProductIdsSet.contains(productId)) {
+                        throw new ApiException(ErrorCode.EXISTS_PAID_HISTORY_PRODUCT);
+                    }
                     orderProducts.add(new OrderProduct(finalOrder.getId(), productId));
                 });
 
