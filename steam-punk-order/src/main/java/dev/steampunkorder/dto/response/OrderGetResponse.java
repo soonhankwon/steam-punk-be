@@ -2,6 +2,7 @@ package dev.steampunkorder.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.steampunkorder.domain.Order;
+import dev.steampunkorder.enumtype.OrderState;
 import java.util.List;
 
 public record OrderGetResponse(
@@ -11,6 +12,8 @@ public record OrderGetResponse(
         Long userId,
         @JsonProperty("total_price")
         Long totalPrice,
+        @JsonProperty("order_state")
+        OrderState orderState,
         @JsonProperty("order_product_ids")
         List<Long> orderProductIds
 ) {
@@ -19,6 +22,7 @@ public record OrderGetResponse(
                 order.getId(),
                 order.getUserId(),
                 totalPrice,
+                order.getOrderState(),
                 orderProductIds
         );
     }
