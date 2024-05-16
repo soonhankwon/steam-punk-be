@@ -1,6 +1,8 @@
 package dev.steampunkorder.domain;
 
 import dev.steampunkorder.common.entity.BaseTimeEntity;
+import dev.steampunkorder.common.enumtype.ErrorCode;
+import dev.steampunkorder.common.exception.ApiException;
 import dev.steampunkorder.enumtype.OrderState;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,6 +48,9 @@ public class Order extends BaseTimeEntity {
     public void updateState(OrderState orderState) {
         if (this.orderState == orderState) {
             return;
+        }
+        if (this.orderState == OrderState.ORDER_PAYMENT_COMPLETED) {
+            throw new ApiException(ErrorCode.CANT_UPDATE_STATE_OF_PAID_PRODUCT);
         }
         this.orderState = orderState;
     }
