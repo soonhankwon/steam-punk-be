@@ -9,6 +9,7 @@ import dev.steampunkorder.dto.request.OrderAddRequest;
 import dev.steampunkorder.dto.request.OrderUpdateRequest;
 import dev.steampunkorder.dto.response.OrderAddResponse;
 import dev.steampunkorder.dto.response.OrderGetResponse;
+import dev.steampunkorder.dto.response.OrderGetResponse.OrderProductDTO;
 import dev.steampunkorder.dto.response.OrderUpdateResponse;
 import dev.steampunkorder.enumtype.OrderState;
 import dev.steampunkorder.repository.OrderProductRepository;
@@ -58,7 +59,8 @@ public class OrderService {
                     if (paidProductIdsSet.contains(productId)) {
                         throw new ApiException(ErrorCode.EXISTS_PAID_HISTORY_PRODUCT);
                     }
-                    orderProducts.add(new OrderProduct(finalOrder.getId(), productId));
+                    ProductInfo productInfo = getProductInfo(productId);
+                    orderProducts.add(new OrderProduct(finalOrder.getId(), productId, productInfo.price()));
                 });
 
         orderProductRepository.saveAll(orderProducts);
@@ -71,15 +73,16 @@ public class OrderService {
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_ORDER_ID));
 
         AtomicReference<Long> totalPrice = new AtomicReference<>(0L);
-        List<Long> orderProductIds = new ArrayList<>();
+        List<OrderProductDTO> orderProductDTOS = new ArrayList<>();
         orderProductRepository.findAllByOrderId(orderId)
                 .forEach(orderProduct -> {
-                    ProductInfo productInfo = getProductInfo(orderProduct.getProductId());
-                    orderProductIds.add(orderProduct.getProductId());
+                    Long productId = orderProduct.getProductId();
+                    ProductInfo productInfo = getProductInfo(productId);
+                    orderProductDTOS.add(OrderProductDTO.of(productId, productInfo));
                     totalPrice.updateAndGet(v -> v + productInfo.price());
                 });
 
-        return OrderGetResponse.of(order, totalPrice.get(), orderProductIds);
+        return OrderGetResponse.of(order, totalPrice.get(), orderProductDTOS);
     }
 
     @Transactional
@@ -93,7 +96,7 @@ public class OrderService {
     private ProductInfo getProductInfo(Long productId) {
         return WebClient.create()
                 .get()
-                .uri("http://localhost:8080/api/v1/products/" + productId)
+                .uri("http://localhost:8080/api/v1/products/{productId}", productId)
                 .retrieve()
                 .bodyToMono(ProductInfo.class)
                 .block();
