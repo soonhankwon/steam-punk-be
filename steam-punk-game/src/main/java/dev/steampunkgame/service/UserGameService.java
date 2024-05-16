@@ -6,6 +6,7 @@ import dev.steampunkgame.domain.UserGameHistory;
 import dev.steampunkgame.dto.request.UserGameAddRequest;
 import dev.steampunkgame.dto.request.UserGamePlayRequest;
 import dev.steampunkgame.dto.response.UserGameAddResponse;
+import dev.steampunkgame.dto.response.UserGameHistoryGetResponse;
 import dev.steampunkgame.dto.response.UserGamePlayResponse;
 import dev.steampunkgame.repository.UserGameHistoryRepository;
 import java.util.ArrayList;
@@ -46,5 +47,13 @@ public class UserGameService {
 
         userGameHistory.played();
         return UserGamePlayResponse.from(userGameHistory);
+    }
+
+    @Transactional(readOnly = true)
+    public UserGameHistoryGetResponse findUserGameHistory(Long userId, Long productId) {
+        UserGameHistory userGameHistory = userGameHistoryRepository.findByProductIdAndUserId(productId, userId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_USER_GAME_HISTORY));
+
+        return UserGameHistoryGetResponse.from(userGameHistory);
     }
 }
