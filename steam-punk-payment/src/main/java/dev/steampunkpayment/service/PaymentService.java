@@ -143,4 +143,13 @@ public class PaymentService {
 
         return RefundProgressGetResponse.of(totalRefundPrice, payment);
     }
+
+    //TODO 유저의 결제정보가 많은 경우 대비 페이지네이션 필요
+    @Transactional(readOnly = true)
+    public List<PaymentGetResponse> findUserPayments(Long userId) {
+        return paymentRepository.findAllByUserId(userId)
+                .stream()
+                .map(PaymentGetResponse::from)
+                .collect(Collectors.toList());
+    }
 }
