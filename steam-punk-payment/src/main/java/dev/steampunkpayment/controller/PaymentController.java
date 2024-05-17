@@ -6,6 +6,7 @@ import dev.steampunkpayment.dto.response.PaymentGetResponse;
 import dev.steampunkpayment.dto.response.RefundProgressAddResponse;
 import dev.steampunkpayment.dto.response.RefundProgressGetResponse;
 import dev.steampunkpayment.service.PaymentService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,21 +31,27 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
-    @GetMapping("{paymentId}")
+    @GetMapping("/{paymentId}")
     public ResponseEntity<PaymentGetResponse> getPayment(@PathVariable Long paymentId) {
         PaymentGetResponse res = paymentService.findPayment(paymentId);
         return ResponseEntity.ok(res);
     }
 
-    @PatchMapping("{paymentId}/refund")
+    @PatchMapping("/{paymentId}/refund")
     public ResponseEntity<RefundProgressAddResponse> addRefundInProgress(@PathVariable Long paymentId) {
         RefundProgressAddResponse res = paymentService.addRefundInProgress(paymentId);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
-    @GetMapping("{paymentId}/refund")
+    @GetMapping("/{paymentId}/refund")
     public ResponseEntity<RefundProgressGetResponse> getRefundInProgress(@PathVariable Long paymentId) {
         RefundProgressGetResponse res = paymentService.findRefundInProgress(paymentId);
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<List<PaymentGetResponse>> getUserPayments(@PathVariable Long userId) {
+        List<PaymentGetResponse> res = paymentService.findUserPayments(userId);
         return ResponseEntity.ok(res);
     }
 }
