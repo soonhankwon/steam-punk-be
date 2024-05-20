@@ -2,7 +2,7 @@ package dev.steampunkpayment.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.steampunkpayment.domain.Payment;
-import dev.steampunkpayment.domain.PaymentState;
+import dev.steampunkpayment.enumtype.PaymentState;
 import java.time.LocalDateTime;
 
 public record RefundProgressGetResponse(
