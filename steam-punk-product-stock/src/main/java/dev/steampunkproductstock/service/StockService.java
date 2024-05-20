@@ -37,7 +37,7 @@ public class StockService {
     @Transactional(readOnly = true)
     public ProductStockGetResponse findProductStock(Long productId) {
         ProductStock productStock = productStockRepository.findByProductId(productId)
-                .orElseThrow(() -> new IllegalArgumentException("no"));
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXIST_PRODUCT_ID));
 
         return ProductStockGetResponse.from(productStock);
     }
@@ -45,16 +45,16 @@ public class StockService {
     public ProductStockGetResponse decreaseProductStock(Long productId) {
         // Redis 싱글 스레드를 활용하여 재고수량 만큼 접근(eg 1000 -> 10)
         Long stockCount = stockQuantityRepository.decrement(productId);
+        log.info("stockCnt={}", stockCount);
         if (!hasStock(stockCount)) {
             throw new ApiException(ErrorCode.NO_STOCK_BY_PRODUCT_ID);
         }
-        log.info("stockCnt={}", stockCount);
         // 재고 수량만큼의 스레드만 트랜잭션 시작(eg 10) -> 이후 재고수량 만큼의 스레드의 동시성 제어는 DB 비관적락 적용(쓰기 락)
         ProductStock productStock = stockTransactionService.decreaseByTransaction(productId);
         return ProductStockGetResponse.from(productStock);
     }
 
     private static boolean hasStock(Long stockCount) {
-        return stockCount < 0;
+        return stockCount + 1 > 0;
     }
 }
