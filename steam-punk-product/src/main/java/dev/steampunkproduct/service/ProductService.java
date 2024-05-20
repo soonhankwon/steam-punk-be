@@ -3,6 +3,10 @@ package dev.steampunkproduct.service;
 import dev.steampunkproduct.common.enumtype.ErrorCode;
 import dev.steampunkproduct.common.exception.ApiException;
 import dev.steampunkproduct.domain.Product;
+import dev.steampunkproduct.domain.ProductState;
+import dev.steampunkproduct.dto.request.ProductAddRequest;
+import dev.steampunkproduct.dto.request.ProductStockAddRequest;
+import dev.steampunkproduct.dto.response.ProductAddResponse;
 import dev.steampunkproduct.dto.response.ProductExistsCheckResponse;
 import dev.steampunkproduct.dto.response.ProductGetResponse;
 import dev.steampunkproduct.repository.ProductRepository;
@@ -12,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @RequiredArgsConstructor
 @Service
@@ -40,5 +45,30 @@ public class ProductService {
     public ProductExistsCheckResponse checkProductExists(Long productId) {
         boolean isExists = productRepository.existsById(productId);
         return ProductExistsCheckResponse.from(isExists);
+    }
+
+    @Transactional
+    public ProductAddResponse addProduct(ProductAddRequest request) {
+        Product product = Product.from(request);
+        ProductState requestProductState = request.productState();
+        product = productRepository.save(product);
+        // 한정수량세일 또는 한정수량 이벤트 상품은 실시간 재고 서비스 등록
+        if (requestProductState == ProductState.ON_SALE_LIMITED_STOCK_EVENT
+                || requestProductState == ProductState.LIMITED_STOCK_EVENT) {
+            ProductStockAddRequest productStockAddRequest = ProductStockAddRequest.of(product.getId(),
+                    request.productStockQuantity());
+            addProductStock(productStockAddRequest);
+        }
+        return ProductAddResponse.from(product);
+    }
+
+    private void addProductStock(ProductStockAddRequest request) {
+        WebClient.create()
+                .post()
+                .uri("http://localhost:8080/api/v1/stock")
+                .bodyValue(request)
+                .retrieve()
+                .toBodilessEntity()
+                .block();
     }
 }
