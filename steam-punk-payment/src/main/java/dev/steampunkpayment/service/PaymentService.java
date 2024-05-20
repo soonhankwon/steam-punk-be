@@ -5,7 +5,6 @@ import dev.steampunkpayment.common.exception.ApiException;
 import dev.steampunkpayment.domain.OrderInfo;
 import dev.steampunkpayment.domain.Payment;
 import dev.steampunkpayment.domain.PaymentProduct;
-import dev.steampunkpayment.domain.PaymentState;
 import dev.steampunkpayment.domain.RefundPolicy;
 import dev.steampunkpayment.domain.UserGamePlayHistoryInfo;
 import dev.steampunkpayment.domain.UserPointInfo;
@@ -15,6 +14,8 @@ import dev.steampunkpayment.dto.response.PaymentAddResponse;
 import dev.steampunkpayment.dto.response.PaymentGetResponse;
 import dev.steampunkpayment.dto.response.RefundProgressAddResponse;
 import dev.steampunkpayment.dto.response.RefundProgressGetResponse;
+import dev.steampunkpayment.enumtype.OrderProductState;
+import dev.steampunkpayment.enumtype.PaymentState;
 import dev.steampunkpayment.event.publish.PaymentCompletedEvent;
 import dev.steampunkpayment.repository.PaymentProductRepository;
 import dev.steampunkpayment.repository.PaymentRepository;
@@ -24,6 +25,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -56,13 +59,32 @@ public class PaymentService {
         // 결제대기 상태의 결제 상품목록 INSERT
         orderInfo.orderProductInfos()
                 .forEach(orderProductInfo -> {
+                    OrderProductState orderProductState = orderProductInfo.orderProductState();
+                    Long productId = orderProductInfo.productId();
+                    // 주문상품 상태가 한정판매인 경우 실시간 재고 마이크로 서비스로 재고확인 및 감소 요청
+                    if (orderProductState == OrderProductState.LIMITED_STOCK_EVENT
+                            || orderProductState == OrderProductState.ON_SALE_LIMITED_STOCK_EVENT) {
+                        ResponseEntity<Void> res = decreaseProductStock(productId);
+                        if (res.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR) {
+                            throw new ApiException(ErrorCode.NO_STOCK_ORDER_PRODUCT);
+                        }
+                    }
                     PaymentProduct paymentProduct = PaymentProduct.of(finalPayment.getId(),
-                            orderProductInfo.productId(), orderProductInfo.price(),
+                            productId, orderProductInfo.price(),
                             PaymentState.PAYMENT_READY);
                     paymentProducts.add(paymentProduct);
                 });
         paymentProductRepository.saveAll(paymentProducts);
         return PaymentAddResponse.from(payment);
+    }
+
+    private ResponseEntity<Void> decreaseProductStock(Long productId) {
+        return WebClient.create()
+                .patch()
+                .uri("http://localhost:8080/api/v1/stock/{productId}", productId)
+                .retrieve()
+                .toBodilessEntity()
+                .block();
     }
 
     // 결제 비즈니스 로직
