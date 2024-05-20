@@ -11,6 +11,7 @@ import dev.steampunkorder.dto.response.OrderAddResponse;
 import dev.steampunkorder.dto.response.OrderGetResponse;
 import dev.steampunkorder.dto.response.OrderGetResponse.OrderProductDTO;
 import dev.steampunkorder.dto.response.OrderUpdateResponse;
+import dev.steampunkorder.enumtype.OrderProductState;
 import dev.steampunkorder.enumtype.OrderState;
 import dev.steampunkorder.repository.OrderProductRepository;
 import dev.steampunkorder.repository.OrderRepository;
@@ -60,7 +61,14 @@ public class OrderService {
                         throw new ApiException(ErrorCode.EXISTS_PAID_HISTORY_PRODUCT);
                     }
                     ProductInfo productInfo = getProductInfo(productId);
-                    orderProducts.add(new OrderProduct(finalOrder.getId(), productId, productInfo.price()));
+                    // 주문한 상품의 할인 및 한정 판매 상태
+                    OrderProductState orderProductState = productInfo.productState();
+                    orderProducts.add(OrderProduct.of(
+                            finalOrder.getId(),
+                            productId,
+                            productInfo.price(),
+                            orderProductState)
+                    );
                 });
 
         orderProductRepository.saveAll(orderProducts);
