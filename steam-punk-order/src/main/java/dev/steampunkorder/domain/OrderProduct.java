@@ -2,8 +2,11 @@ package dev.steampunkorder.domain;
 
 
 import dev.steampunkorder.common.entity.BaseTimeEntity;
+import dev.steampunkorder.enumtype.OrderProductState;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,9 +35,24 @@ public class OrderProduct extends BaseTimeEntity {
     @Column(name = "price")
     private Long price;
 
-    public OrderProduct(Long orderId, Long productId, Long price) {
+    // 주문한 상품의 할인 및 한정 판매 상태
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_product_state")
+    private OrderProductState orderProductState;
+
+    private OrderProduct(Long orderId, Long productId, Long price, OrderProductState orderProductState) {
         this.orderId = orderId;
         this.productId = productId;
         this.price = price;
+        this.orderProductState = orderProductState;
+    }
+
+    public static OrderProduct of(Long orderId, Long productId, Long price, OrderProductState orderProductState) {
+        return new OrderProduct(
+                orderId,
+                productId,
+                price,
+                orderProductState
+        );
     }
 }
