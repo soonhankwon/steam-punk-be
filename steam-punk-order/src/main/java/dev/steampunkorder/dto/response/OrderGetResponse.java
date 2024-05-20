@@ -3,6 +3,7 @@ package dev.steampunkorder.dto.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.steampunkorder.domain.Order;
 import dev.steampunkorder.domain.ProductInfo;
+import dev.steampunkorder.enumtype.OrderProductState;
 import dev.steampunkorder.enumtype.OrderState;
 import java.util.List;
 
@@ -22,12 +23,15 @@ public record OrderGetResponse(
             @JsonProperty("product_id")
             Long productId,
             @JsonProperty("price")
-            Long price
+            Long price,
+            @JsonProperty("order_product_state")
+            OrderProductState orderProductState
     ) {
         public static OrderProductDTO of(Long productId, ProductInfo productInfo) {
             return new OrderProductDTO(
                     productId,
-                    productInfo.price()
+                    productInfo.price(),
+                    productInfo.productState()
             );
         }
     }
