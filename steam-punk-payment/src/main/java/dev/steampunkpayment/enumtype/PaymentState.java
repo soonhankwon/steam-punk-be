@@ -1,4 +1,4 @@
-package dev.steampunkpayment.domain;
+package dev.steampunkpayment.enumtype;
 
 public enum PaymentState {
     PAYMENT_READY,
