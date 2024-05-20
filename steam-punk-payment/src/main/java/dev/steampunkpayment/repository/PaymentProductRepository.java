@@ -1,7 +1,7 @@
 package dev.steampunkpayment.repository;
 
 import dev.steampunkpayment.domain.PaymentProduct;
-import dev.steampunkpayment.domain.PaymentState;
+import dev.steampunkpayment.enumtype.PaymentState;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
