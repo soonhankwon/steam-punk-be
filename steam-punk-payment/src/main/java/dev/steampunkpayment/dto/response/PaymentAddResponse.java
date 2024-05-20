@@ -2,17 +2,21 @@ package dev.steampunkpayment.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.steampunkpayment.domain.Payment;
+import dev.steampunkpayment.domain.PaymentState;
 
 public record PaymentAddResponse(
-        @JsonProperty("is_paid")
-        boolean isPaid,
+        @JsonProperty("payment_id")
+        Long paymentId,
         @JsonProperty("total_price")
-        Long totalPrice
+        Long totalPrice,
+        @JsonProperty("payment_state")
+        PaymentState paymentState
 ) {
     public static PaymentAddResponse from(Payment payment) {
         return new PaymentAddResponse(
-                true,
-                payment.getTotalPrice()
+                payment.getId(),
+                payment.getTotalPrice(),
+                payment.getPaymentState()
         );
     }
 }
