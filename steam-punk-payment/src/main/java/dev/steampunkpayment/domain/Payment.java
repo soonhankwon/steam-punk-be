@@ -41,10 +41,10 @@ public class Payment extends BaseTimeEntity {
         this.userId = userId;
         this.orderId = orderId;
         this.totalPrice = totalPrice;
-        this.paymentState = PaymentState.PAYMENT_COMPLETED;
+        this.paymentState = PaymentState.PAYMENT_READY;
     }
 
-    public static Payment of(PaymentAddRequest request, OrderInfo orderInfo) {
+    public static Payment ofReady(PaymentAddRequest request, OrderInfo orderInfo) {
         return new Payment(
                 request.userId(),
                 request.orderId(),
@@ -58,5 +58,12 @@ public class Payment extends BaseTimeEntity {
             return;
         }
         this.paymentState = PaymentState.PAYMENT_REFUND_IN_PROGRESS;
+    }
+
+    public void complete() {
+        if (this.paymentState == PaymentState.PAYMENT_COMPLETED) {
+            return;
+        }
+        this.paymentState = PaymentState.PAYMENT_COMPLETED;
     }
 }
