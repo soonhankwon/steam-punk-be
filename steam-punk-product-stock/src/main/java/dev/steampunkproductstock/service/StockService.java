@@ -50,7 +50,7 @@ public class StockService {
         }
         log.info("stockCnt={}", stockCount);
         // 재고 수량만큼의 스레드만 트랜잭션 시작(eg 10) -> 이후 재고수량 만큼의 스레드의 동시성 제어는 DB 비관적락 적용(쓰기 락)
-        ProductStock productStock = stockTransactionService.updateByTransaction(productId);
+        ProductStock productStock = stockTransactionService.decreaseByTransaction(productId);
         return ProductStockGetResponse.from(productStock);
     }
 

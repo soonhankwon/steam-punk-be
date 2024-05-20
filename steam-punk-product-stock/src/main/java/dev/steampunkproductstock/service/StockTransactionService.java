@@ -17,7 +17,7 @@ public class StockTransactionService {
     private final ProductStockRepository productStockRepository;
 
     @Transactional
-    public ProductStock updateByTransaction(Long productId) {
+    public ProductStock decreaseByTransaction(Long productId) {
         // 비관적락 적용 - 쓰기 락
         ProductStock productStock = productStockRepository.findByProductId(productId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXIST_PRODUCT_ID));
