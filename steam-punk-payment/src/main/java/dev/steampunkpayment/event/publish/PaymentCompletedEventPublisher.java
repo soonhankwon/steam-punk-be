@@ -1,28 +1,29 @@
 package dev.steampunkpayment.event.publish;
 
-import dev.steampunkpayment.domain.OrderInfo;
 import dev.steampunkpayment.domain.OrderProductInfo;
 import dev.steampunkpayment.dto.request.OrderStateUpdateRequest;
 import dev.steampunkpayment.dto.request.UserGameHistoryAddRequest;
 import dev.steampunkpayment.dto.request.UserPointDecreaseRequest;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.reactive.function.client.WebClient;
 
+@RequiredArgsConstructor
 @Component
 public class PaymentCompletedEventPublisher {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void publishPaymentCompletedEvent(PaymentCompletedEvent paymentCompletedEvent) {
-        OrderInfo orderInfo = paymentCompletedEvent.orderInfo();
-        Long orderId = orderInfo.orderId();
-        Long userId = orderInfo.userId();
+        Long orderId = paymentCompletedEvent.payment().getOrderId();
+        Long userId = paymentCompletedEvent.payment().getUserId();
+        Long paidTotalPrice = paymentCompletedEvent.payment().getTotalPrice();
         assert orderId != null && userId != null;
 
-        List<Long> productIds = orderInfo.orderProductInfos()
+        List<Long> productIds = paymentCompletedEvent.orderProductInfos()
                 .stream()
                 .map(OrderProductInfo::productId)
                 .collect(Collectors.toList());
@@ -32,7 +33,7 @@ public class PaymentCompletedEventPublisher {
         );
 
         decreaseUserPoint(userId,
-                UserPointDecreaseRequest.from(orderInfo)
+                UserPointDecreaseRequest.from(paidTotalPrice)
         );
 
         addUserGameHistory(
