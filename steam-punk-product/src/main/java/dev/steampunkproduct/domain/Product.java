@@ -1,5 +1,6 @@
 package dev.steampunkproduct.domain;
 
+import dev.steampunkproduct.dto.request.ProductAddRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -48,4 +49,30 @@ public class Product {
     @Enumerated(EnumType.STRING)
     @Column(name = "discount_policy")
     private ProductDiscountPolicy productDiscountPolicy;
+
+    private Product(String name, Double price, String shortDescription, String headerImage, String webSite,
+                    String developer,
+                    ProductState productState, ProductDiscountPolicy productDiscountPolicy) {
+        this.name = name;
+        this.price = price;
+        this.shortDescription = shortDescription;
+        this.headerImage = headerImage;
+        this.webSite = webSite;
+        this.developer = developer;
+        this.productState = productState;
+        this.productDiscountPolicy = productDiscountPolicy;
+    }
+
+    public static Product from(ProductAddRequest request) {
+        return new Product(
+                request.name(),
+                request.price(),
+                request.shortDescription(),
+                request.headerImage(),
+                request.webSite(),
+                request.developer(),
+                request.productState(),
+                request.productDiscountPolicy()
+        );
+    }
 }
