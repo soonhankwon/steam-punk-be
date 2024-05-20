@@ -1,6 +1,7 @@
 package dev.steampunkpayment.domain;
 
 import dev.steampunkpayment.common.entity.BaseTimeEntity;
+import dev.steampunkpayment.enumtype.PaymentState;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
