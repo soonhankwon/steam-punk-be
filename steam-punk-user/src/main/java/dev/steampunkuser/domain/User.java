@@ -14,6 +14,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.util.function.Function;
 import lombok.AccessLevel;
@@ -23,7 +24,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "`user`")
+@Table(name = "`user`", indexes = {
+        @Index(name = "user_email_idx", columnList = "email")
+})
 public class User extends BaseTimeEntity {
 
     private static final long MIN_POINT = 0L;
