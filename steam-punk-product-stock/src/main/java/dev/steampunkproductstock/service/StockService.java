@@ -7,9 +7,11 @@ import dev.steampunkproductstock.dto.request.ProductStockAddRequest;
 import dev.steampunkproductstock.dto.response.ProductStockAddResponse;
 import dev.steampunkproductstock.dto.response.ProductStockGetResponse;
 import dev.steampunkproductstock.repository.ProductStockRepository;
-import dev.steampunkproductstock.repository.StockQuantityRepository;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,18 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class StockService {
 
     private final ProductStockRepository productStockRepository;
-    private final StockQuantityRepository stockQuantityRepository;
     private final StockTransactionService stockTransactionService;
+    private final RedissonClient redissonClient;
 
 
     @Transactional
     public ProductStockAddResponse addProductStock(ProductStockAddRequest request) {
         ProductStock productStock = ProductStock.from(request);
         productStock = productStockRepository.save(productStock);
-        stockQuantityRepository.putStockQuantity(
-                productStock.getProductId(),
-                productStock.getStockQuantity()
-        );
         return ProductStockAddResponse.from(productStock);
     }
 
@@ -43,18 +41,19 @@ public class StockService {
     }
 
     public ProductStockGetResponse decreaseProductStock(Long productId) {
-        // Redis 싱글 스레드를 활용하여 재고수량 만큼 접근(eg 1000 -> 10)
-        Long stockCount = stockQuantityRepository.decrement(productId);
-        log.info("stockCnt={}", stockCount);
-        if (!hasStock(stockCount)) {
+        // Redisson 분산락 적용(Pub,Sub)
+        RLock lock = redissonClient.getLock(String.valueOf(productId));
+        ProductStock productStock;
+        try {
+            // waitTime: 락을 기다리는 시간, leaseTime: 락 임대 시간
+            lock.tryLock(5, 3, TimeUnit.SECONDS);
+            // Lock을 획득한 요청만 트랜잭션 시작
+            productStock = stockTransactionService.decreaseByTransaction(productId);
+        } catch (InterruptedException e) {
             throw new ApiException(ErrorCode.NO_STOCK_BY_PRODUCT_ID);
+        } finally {
+            lock.unlock();
         }
-        // 재고 수량만큼의 스레드만 트랜잭션 시작(eg 10) -> 이후 재고수량 만큼의 스레드의 동시성 제어는 DB 비관적락 적용(쓰기 락)
-        ProductStock productStock = stockTransactionService.decreaseByTransaction(productId);
         return ProductStockGetResponse.from(productStock);
-    }
-
-    private static boolean hasStock(Long stockCount) {
-        return stockCount + 1 > 0;
     }
 }
