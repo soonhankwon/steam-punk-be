@@ -2,16 +2,20 @@ package dev.steampunkproduct.service;
 
 import dev.steampunkproduct.common.enumtype.ErrorCode;
 import dev.steampunkproduct.common.exception.ApiException;
+import dev.steampunkproduct.domain.Category;
 import dev.steampunkproduct.domain.Product;
+import dev.steampunkproduct.domain.ProductCategory;
 import dev.steampunkproduct.domain.ProductState;
 import dev.steampunkproduct.dto.request.ProductAddRequest;
 import dev.steampunkproduct.dto.request.ProductStockAddRequest;
 import dev.steampunkproduct.dto.response.ProductAddResponse;
 import dev.steampunkproduct.dto.response.ProductExistsCheckResponse;
 import dev.steampunkproduct.dto.response.ProductGetResponse;
+import dev.steampunkproduct.repository.CategoryRepository;
+import dev.steampunkproduct.repository.ProductCategoryRepository;
 import dev.steampunkproduct.repository.ProductRepository;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -23,22 +27,45 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final ProductCategoryRepository productCategoryRepository;
     private static final int PAGE_SIZE = 10;
 
     @Transactional(readOnly = true)
     public ProductGetResponse getProduct(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXIST_PRODUCT_ID));
-        return ProductGetResponse.from(product);
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_PRODUCT_ID));
+
+        List<ProductCategory> productCategories = productCategoryRepository.findAllByProduct(product);
+        List<String> categories = new ArrayList<>();
+        productCategories.forEach(i -> {
+            Category category = categoryRepository.findById(i.getCategoryId())
+                    .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_CATEGORY_ID));
+            categories.add(category.getName());
+        });
+
+        return ProductGetResponse.of(product, categories);
     }
 
     @Transactional(readOnly = true)
     public List<ProductGetResponse> getProducts(int pageNumber) {
         PageRequest pageRequest = PageRequest.of(pageNumber, PAGE_SIZE);
-        return productRepository.findAll(pageRequest)
+        List<Product> products = productRepository.findAll(pageRequest)
                 .stream()
-                .map(ProductGetResponse::from)
-                .collect(Collectors.toList());
+                .toList();
+
+        List<ProductGetResponse> res = new ArrayList<>();
+        products.forEach(p -> {
+            List<ProductCategory> productCategories = productCategoryRepository.findAllByProduct(p);
+            List<String> categories = new ArrayList<>();
+            productCategories.forEach(pc -> {
+                Category category = categoryRepository.findById(pc.getCategoryId())
+                        .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_CATEGORY_ID));
+                categories.add(category.getName());
+            });
+            res.add(ProductGetResponse.of(p, categories));
+        });
+        return res;
     }
 
     @Transactional(readOnly = true)
