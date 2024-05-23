@@ -1,19 +1,14 @@
 package dev.steampunkuser.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.steampunkuser.domain.User;
-import java.time.LocalDateTime;
 
 public record UserAddResponse(
         @JsonProperty("is_added")
-        boolean isAdded,
-        @JsonProperty("created_at")
-        LocalDateTime createdAt
+        Boolean isAdded
 ) {
-    public static UserAddResponse from(User user) {
+    public static UserAddResponse ofSuccess() {
         return new UserAddResponse(
-                true,
-                user.getCreatedAt()
+                Boolean.TRUE
         );
     }
 }
