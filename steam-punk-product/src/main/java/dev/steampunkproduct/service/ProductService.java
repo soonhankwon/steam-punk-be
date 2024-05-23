@@ -11,6 +11,8 @@ import dev.steampunkproduct.dto.request.ProductStockAddRequest;
 import dev.steampunkproduct.dto.response.ProductAddResponse;
 import dev.steampunkproduct.dto.response.ProductExistsCheckResponse;
 import dev.steampunkproduct.dto.response.ProductGetResponse;
+import dev.steampunkproduct.dto.response.ProductsGetResponse;
+import dev.steampunkproduct.dto.response.ProductsGetResponse.ProductsMetaData;
 import dev.steampunkproduct.repository.CategoryRepository;
 import dev.steampunkproduct.repository.ProductCategoryRepository;
 import dev.steampunkproduct.repository.ProductRepository;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,12 +52,16 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductGetResponse> getProducts(int pageNumber) {
+    public ProductsGetResponse getProducts(int pageNumber) {
         PageRequest pageRequest = PageRequest.of(pageNumber, PAGE_SIZE);
-        List<Product> products = productRepository.findAll(pageRequest)
-                .stream()
-                .toList();
+        Page<Product> productPage = productRepository.findAll(pageRequest);
+        ProductsMetaData metaData = new ProductsMetaData(
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                productPage.isLast()
+        );
 
+        List<Product> products = productPage.stream().toList();
         List<ProductGetResponse> res = new ArrayList<>();
         products.forEach(p -> {
             List<ProductCategory> productCategories = productCategoryRepository.findAllByProduct(p);
@@ -66,7 +73,7 @@ public class ProductService {
             });
             res.add(ProductGetResponse.of(p, categories));
         });
-        return res;
+        return ProductsGetResponse.of(metaData, res);
     }
 
     @Transactional(readOnly = true)
