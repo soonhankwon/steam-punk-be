@@ -5,13 +5,13 @@ import dev.steampunkuser.domain.User;
 
 public record UserPhoneNumberUpdateResponse(
         @JsonProperty("is_updated")
-        boolean isUpdated,
+        Boolean isUpdated,
         @JsonProperty("phone_number")
         String phoneNumber
 ) {
-    public static UserPhoneNumberUpdateResponse from(User user) {
+    public static UserPhoneNumberUpdateResponse ofSuccess(User user) {
         return new UserPhoneNumberUpdateResponse(
-                true,
+                Boolean.TRUE,
                 user.getPhoneNumber()
         );
     }
