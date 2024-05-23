@@ -3,6 +3,7 @@ package dev.steampunkproduct.dto.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.steampunkproduct.domain.ProductDiscountPolicy;
 import dev.steampunkproduct.domain.ProductState;
+import java.util.List;
 
 public record ProductAddRequest(
         String name,
@@ -18,7 +19,9 @@ public record ProductAddRequest(
         ProductState productState,
         @JsonProperty("discount_policy")
         ProductDiscountPolicy productDiscountPolicy,
-        @JsonProperty("product_stock_quantity")
-        Long productStockQuantity
+        @JsonProperty("stock_quantity")
+        Long stockQuantity,
+        @JsonProperty("categories")
+        List<String> categories
 ) {
 }
