@@ -8,17 +8,23 @@ import dev.steampunkorder.enumtype.OrderState;
 import java.util.List;
 
 public record OrderGetResponse(
-        @JsonProperty("order_id")
-        Long orderId,
-        @JsonProperty("user_id")
-        Long userId,
-        @JsonProperty("total_price")
-        Long totalPrice,
-        @JsonProperty("order_state")
-        OrderState orderState,
-        @JsonProperty("order_products")
+        @JsonProperty("meta")
+        OrderMetaData orderMetaData,
+        @JsonProperty("document")
         List<OrderProductDTO> orderProducts
 ) {
+    public record OrderMetaData(
+            @JsonProperty("order_id")
+            Long orderId,
+            @JsonProperty("user_id")
+            Long userId,
+            @JsonProperty("total_price")
+            Long totalPrice,
+            @JsonProperty("order_state")
+            OrderState orderState
+    ) {
+    }
+
     public record OrderProductDTO(
             @JsonProperty("product_id")
             Long productId,
@@ -38,10 +44,12 @@ public record OrderGetResponse(
 
     public static OrderGetResponse of(Order order, Long totalPrice, List<OrderProductDTO> orderProductDTOS) {
         return new OrderGetResponse(
-                order.getId(),
-                order.getUserId(),
-                totalPrice,
-                order.getOrderState(),
+                new OrderMetaData(
+                        order.getId(),
+                        order.getUserId(),
+                        totalPrice,
+                        order.getOrderState()
+                ),
                 orderProductDTOS
         );
     }
