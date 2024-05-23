@@ -16,7 +16,7 @@ public record AuthLoginResponse(
         return new AuthLoginResponse(
                 userInfo.userId(),
                 refreshToken,
-                userInfo.isValid()
+                userInfo.isRegistered()
         );
     }
 }
