@@ -71,8 +71,7 @@ public class UserController {
     }
 
     @PatchMapping("/password")
-    public ResponseEntity<UserPasswordUpdateResponse> updatePassword(
-            @RequestBody UserPasswordUpdateRequest request) {
+    public ResponseEntity<UserPasswordUpdateResponse> updatePassword(@RequestBody UserPasswordUpdateRequest request) {
         UserPasswordUpdateResponse res = userService.updatePassword(request);
         return ResponseEntity.ok(res);
     }
