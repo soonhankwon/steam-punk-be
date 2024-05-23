@@ -37,4 +37,10 @@ public class ProductCategory {
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    public ProductCategory(Product product, Long categoryId) {
+        this.product = product;
+        this.categoryId = categoryId;
+        this.createdAt = LocalDateTime.now();
+    }
 }
