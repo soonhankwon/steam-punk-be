@@ -16,6 +16,7 @@ import dev.steampunkproduct.repository.ProductCategoryRepository;
 import dev.steampunkproduct.repository.ProductRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -79,11 +80,22 @@ public class ProductService {
         Product product = Product.from(request);
         ProductState requestProductState = request.productState();
         product = productRepository.save(product);
+        Product finalProduct = product;
+        request.categories()
+                .forEach(c -> {
+                    Category category = categoryRepository.findByName(c)
+                            .orElseGet(() -> categoryRepository.save(new Category(c)));
+                    productCategoryRepository.save(
+                            new ProductCategory(
+                                    finalProduct,
+                                    Objects.requireNonNull(category, "Category Id cannot be null").getId())
+                    );
+                });
         // 한정수량세일 또는 한정수량 이벤트 상품은 실시간 재고 서비스 등록
         if (requestProductState == ProductState.ON_SALE_LIMITED_STOCK_EVENT
                 || requestProductState == ProductState.LIMITED_STOCK_EVENT) {
             ProductStockAddRequest productStockAddRequest = ProductStockAddRequest.of(product.getId(),
-                    request.productStockQuantity());
+                    request.stockQuantity());
             addProductStock(productStockAddRequest);
         }
         return ProductAddResponse.from(product);
