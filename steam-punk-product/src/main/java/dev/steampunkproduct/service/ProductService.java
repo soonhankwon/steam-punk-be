@@ -88,7 +88,8 @@ public class ProductService {
                     productCategoryRepository.save(
                             new ProductCategory(
                                     finalProduct,
-                                    Objects.requireNonNull(category, "Category Id cannot be null").getId())
+                                    Objects.requireNonNull(category, "Category Id cannot be null").getId()
+                            )
                     );
                 });
         // 한정수량세일 또는 한정수량 이벤트 상품은 실시간 재고 서비스 등록
