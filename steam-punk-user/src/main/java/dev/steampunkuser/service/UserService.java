@@ -14,7 +14,6 @@ import dev.steampunkuser.dto.response.UserPhoneNumberUpdateResponse;
 import dev.steampunkuser.dto.response.UserPointGetResponse;
 import dev.steampunkuser.dto.response.UserPointUpdateResponse;
 import dev.steampunkuser.repository.UserRepository;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -54,12 +53,9 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserGetResponse findUser(String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isEmpty()) {
-            return UserGetResponse.invalid();
-        }
-        User user = optionalUser.get();
-        return UserGetResponse.valid(user);
+        return userRepository.findByEmail(email)
+                .map(UserGetResponse::ofRegistered)
+                .orElseGet(UserGetResponse::ofUnRegistered);
     }
 
     @Transactional(readOnly = true)
