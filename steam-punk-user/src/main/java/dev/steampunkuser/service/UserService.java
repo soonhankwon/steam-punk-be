@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RequiredArgsConstructor
 @Service
@@ -28,27 +29,27 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public UserAddResponse addUser(UserAddRequest request) {
+    public UserAddResponse addUser(@RequestBody UserAddRequest request) {
         User user = User.of(request, passwordEncoder::encode);
-        user = userRepository.save(user);
-        return UserAddResponse.from(user);
+        userRepository.save(user);
+        return UserAddResponse.ofSuccess();
     }
 
     @Transactional
-    public UserPhoneNumberUpdateResponse updatePhoneNumber(UserPhoneNumberUpdateRequest request) {
+    public UserPhoneNumberUpdateResponse updatePhoneNumber(@RequestBody UserPhoneNumberUpdateRequest request) {
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_USER_ID));
 
         user.updatePhoneNumber(request);
-        return UserPhoneNumberUpdateResponse.from(user);
+        return UserPhoneNumberUpdateResponse.ofSuccess(user);
     }
 
     @Transactional
-    public UserPasswordUpdateResponse updatePassword(UserPasswordUpdateRequest request) {
+    public UserPasswordUpdateResponse updatePassword(@RequestBody UserPasswordUpdateRequest request) {
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_USER_ID));
         user.updatePassword(request, passwordEncoder::encode);
-        return UserPasswordUpdateResponse.success();
+        return UserPasswordUpdateResponse.ofSuccess();
     }
 
     @Transactional(readOnly = true)
@@ -69,7 +70,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserPointUpdateResponse increaseUserPoint(Long userId, UserPointUpdateRequest request) {
+    public UserPointUpdateResponse increaseUserPoint(Long userId,
+                                                     @RequestBody UserPointUpdateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_USER_ID));
 
@@ -78,7 +80,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserPointUpdateResponse decreaseUserPoint(Long userId, UserPointUpdateRequest request) {
+    public UserPointUpdateResponse decreaseUserPoint(Long userId,
+                                                     @RequestBody UserPointUpdateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_USER_ID));
 
