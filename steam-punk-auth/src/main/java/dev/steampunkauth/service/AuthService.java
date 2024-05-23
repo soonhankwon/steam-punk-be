@@ -23,8 +23,8 @@ public class AuthService {
     public AuthLoginResponse login(AuthLoginRequest request, HttpServletResponse httpServletResponse) {
         String defaultAccessToken = jwtProvider.createDefaultToken(true);
         UserInfo userInfo = getUserInfo(request, defaultAccessToken);
-        
-        if (!userInfo.isValid()) {
+
+        if (!userInfo.isRegistered()) {
             throw new IllegalArgumentException("invalid access");
         }
 
