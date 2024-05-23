@@ -7,21 +7,21 @@ public record UserGetResponse(
         @JsonProperty("user_id")
         Long userId,
         String password,
-        @JsonProperty("is_valid")
-        boolean isValid
+        @JsonProperty("is_registered")
+        Boolean isRegistered
 ) {
-    public static UserGetResponse invalid() {
+    public static UserGetResponse ofUnRegistered() {
         return new UserGetResponse(null,
                 null,
-                false
+                Boolean.FALSE
         );
     }
 
-    public static UserGetResponse valid(User user) {
+    public static UserGetResponse ofRegistered(User user) {
         return new UserGetResponse(
                 user.getId(),
                 user.getPassword(),
-                true
+                Boolean.TRUE
         );
     }
 }
