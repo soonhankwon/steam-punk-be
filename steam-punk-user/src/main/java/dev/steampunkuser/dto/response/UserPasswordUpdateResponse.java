@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record UserPasswordUpdateResponse(
         @JsonProperty("is_updated")
-        boolean isUpdated
+        Boolean isUpdated
 ) {
-    public static UserPasswordUpdateResponse success() {
+    public static UserPasswordUpdateResponse ofSuccess() {
         return new UserPasswordUpdateResponse(
-                true
+                Boolean.TRUE
         );
     }
 }
