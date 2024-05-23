@@ -7,8 +7,8 @@ public record UserInfo(
         @JsonProperty("user_id")
         Long userId,
         String password,
-        @JsonProperty("is_valid")
-        boolean isValid
+        @JsonProperty("is_registered")
+        Boolean isRegistered
 ) {
     public void validatePassword(String rawPassword, BiFunction<String, String, Boolean> matchesFunction) {
         boolean isValid = matchesFunction.apply(rawPassword, this.password);
