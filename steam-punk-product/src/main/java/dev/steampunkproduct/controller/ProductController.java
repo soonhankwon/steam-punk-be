@@ -4,8 +4,8 @@ import dev.steampunkproduct.dto.request.ProductAddRequest;
 import dev.steampunkproduct.dto.response.ProductAddResponse;
 import dev.steampunkproduct.dto.response.ProductExistsCheckResponse;
 import dev.steampunkproduct.dto.response.ProductGetResponse;
+import dev.steampunkproduct.dto.response.ProductsGetResponse;
 import dev.steampunkproduct.service.ProductService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,8 +43,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductGetResponse>> getProducts(@RequestParam(value = "page_number") int pageNumber) {
-        List<ProductGetResponse> res = productService.getProducts(pageNumber);
+    public ResponseEntity<ProductsGetResponse> getProducts(@RequestParam(value = "page_number") int pageNumber) {
+        ProductsGetResponse res = productService.getProducts(pageNumber);
         return ResponseEntity.ok(res);
     }
 }
