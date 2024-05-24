@@ -68,8 +68,8 @@ public class PaymentService {
                     OrderProductState orderProductState = orderProductInfo.orderProductState();
                     Long productId = orderProductInfo.productId();
                     // 주문상품 상태가 한정판매인 경우 실시간 재고 마이크로 서비스로 재고확인 및 감소 요청
-                    if (orderProductState == OrderProductState.LIMITED_STOCK_EVENT
-                            || orderProductState == OrderProductState.ON_SALE_LIMITED_STOCK_EVENT) {
+                    if (orderProductState == OrderProductState.LIMITED_STOCK
+                            || orderProductState == OrderProductState.ON_SALE_LIMITED_STOCK) {
                         ResponseEntity<Void> res = decreaseProductStock(productId);
                         if (res.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR) {
                             throw new ApiException(ErrorCode.NO_STOCK_ORDER_PRODUCT);
