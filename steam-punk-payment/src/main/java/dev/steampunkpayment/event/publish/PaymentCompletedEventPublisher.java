@@ -16,6 +16,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Component
 public class PaymentCompletedEventPublisher {
 
+    private static final String ORDER_PAID_STATE = "ORDER_PAID";
+
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void publishPaymentCompletedEvent(PaymentCompletedEvent paymentCompletedEvent) {
         Long orderId = paymentCompletedEvent.payment().getOrderId();
@@ -29,7 +31,7 @@ public class PaymentCompletedEventPublisher {
                 .collect(Collectors.toList());
 
         updateOrderState(orderId,
-                OrderStateUpdateRequest.of(userId, "ORDER_PAYMENT_COMPLETED")
+                OrderStateUpdateRequest.of(userId, ORDER_PAID_STATE)
         );
 
         decreaseUserPoint(userId,
