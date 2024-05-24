@@ -19,7 +19,6 @@ import dev.steampunkpayment.dto.response.RefundProgressAddResponse;
 import dev.steampunkpayment.dto.response.RefundProgressGetResponse;
 import dev.steampunkpayment.enumtype.OrderProductState;
 import dev.steampunkpayment.enumtype.PaymentProductState;
-import dev.steampunkpayment.enumtype.PaymentState;
 import dev.steampunkpayment.event.publish.PaymentCompletedEvent;
 import dev.steampunkpayment.repository.PaymentProductRepository;
 import dev.steampunkpayment.repository.PaymentRepository;
@@ -107,8 +106,8 @@ public class PaymentService {
         OrderInfo orderInfo = getOrderInfo(payment.getOrderId());
         Long paymentId = payment.getId();
 
-        List<PaymentProduct> paymentProducts = paymentProductRepository.findAllByPaymentIdAndPaymentState(
-                paymentId, PaymentState.READY);
+        List<PaymentProduct> paymentProducts = paymentProductRepository.findAllByPaymentIdAndPaymentProductState(
+                paymentId, PaymentProductState.READY);
         // 결제대기인 상품들을 완료상태로 변경 - Dirty Check
         paymentProducts.forEach(PaymentProduct::paid);
         payment.complete();
@@ -149,9 +148,9 @@ public class PaymentService {
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_PAYMENT_ID));
 
         // 결제완료 상태인 결제 상품목록을 조회
-        List<PaymentProduct> paymentProducts = paymentProductRepository.findAllByPaymentIdAndPaymentState(
+        List<PaymentProduct> paymentProducts = paymentProductRepository.findAllByPaymentIdAndPaymentProductState(
                 payment.getId(),
-                PaymentState.PAID
+                PaymentProductState.PAID
         );
 
         // 결제완료된 주문 상품들에 대한 플레이 기록을 가져와서 리스트로 변환
@@ -198,9 +197,9 @@ public class PaymentService {
     public RefundProgressGetResponse findRefundInProgress(Long paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_PAYMENT_ID));
-        List<PaymentProduct> paymentRefundProducts = paymentProductRepository.findAllByPaymentIdAndPaymentState(
+        List<PaymentProduct> paymentRefundProducts = paymentProductRepository.findAllByPaymentIdAndPaymentProductState(
                 paymentId,
-                PaymentState.REFUND_IN_PROGRESS
+                PaymentProductState.REFUND_IN_PROGRESS
         );
 
         long totalRefundPrice = paymentRefundProducts.stream()

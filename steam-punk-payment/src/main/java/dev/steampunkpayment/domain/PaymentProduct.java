@@ -35,6 +35,7 @@ public class PaymentProduct extends BaseTimeEntity {
     private Long price;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "payment_product_state")
     private PaymentProductState paymentProductState;
 
     public PaymentProduct(Long paymentId, Long productId, Long price, PaymentProductState paymentProductState) {
