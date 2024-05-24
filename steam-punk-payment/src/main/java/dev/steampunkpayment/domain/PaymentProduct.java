@@ -1,7 +1,7 @@
 package dev.steampunkpayment.domain;
 
 import dev.steampunkpayment.common.entity.BaseTimeEntity;
-import dev.steampunkpayment.enumtype.PaymentState;
+import dev.steampunkpayment.enumtype.PaymentProductState;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -35,35 +35,30 @@ public class PaymentProduct extends BaseTimeEntity {
     private Long price;
 
     @Enumerated(EnumType.STRING)
-    private PaymentState paymentState;
+    private PaymentProductState paymentProductState;
 
-    public PaymentProduct(Long paymentId, Long productId, Long price, PaymentState paymentState) {
+    public PaymentProduct(Long paymentId, Long productId, Long price, PaymentProductState paymentProductState) {
         this.paymentId = paymentId;
         this.productId = productId;
         this.price = price;
-        this.paymentState = paymentState;
+        this.paymentProductState = paymentProductState;
     }
 
-    public static PaymentProduct of(Long paymentId, Long productId, Long productPrice, PaymentState paymentState) {
+    public static PaymentProduct of(Long paymentId, Long productId, Long productPrice,
+                                    PaymentProductState paymentProductState) {
         return new PaymentProduct(
                 paymentId,
                 productId,
                 productPrice,
-                paymentState
+                paymentProductState
         );
     }
 
     public void paid() {
-        if (this.paymentState == PaymentState.PAYMENT_COMPLETED) {
-            return;
-        }
-        this.paymentState = PaymentState.PAYMENT_COMPLETED;
+        this.paymentProductState = PaymentProductState.PAID;
     }
 
     public void refundInProgress() {
-        if (this.paymentState == PaymentState.PAYMENT_REFUND_IN_PROGRESS) {
-            return;
-        }
-        this.paymentState = PaymentState.PAYMENT_REFUND_IN_PROGRESS;
+        this.paymentProductState = PaymentProductState.REFUND_IN_PROGRESS;
     }
 }
