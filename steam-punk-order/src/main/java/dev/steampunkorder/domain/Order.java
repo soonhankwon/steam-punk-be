@@ -41,7 +41,7 @@ public class Order extends BaseTimeEntity {
     public static Order ofPendingOrder(Long userId) {
         return new Order(
                 userId,
-                OrderState.ORDER_PENDING
+                OrderState.READY
         );
     }
 
@@ -49,7 +49,7 @@ public class Order extends BaseTimeEntity {
         if (this.orderState == orderState) {
             return;
         }
-        if (this.orderState == OrderState.ORDER_PAYMENT_COMPLETED) {
+        if (this.orderState == OrderState.ORDER_PAID) {
             throw new ApiException(ErrorCode.CANT_UPDATE_STATE_OF_PAID_PRODUCT);
         }
         this.orderState = orderState;
