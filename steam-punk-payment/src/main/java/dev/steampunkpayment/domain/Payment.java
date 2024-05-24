@@ -42,7 +42,7 @@ public class Payment extends BaseTimeEntity {
         this.userId = userId;
         this.orderId = orderId;
         this.totalPrice = totalPrice;
-        this.paymentState = PaymentState.PAYMENT_READY;
+        this.paymentState = PaymentState.READY;
     }
 
     public static Payment ofReady(PaymentAddRequest request, OrderInfo orderInfo) {
@@ -55,16 +55,16 @@ public class Payment extends BaseTimeEntity {
 
     public void refundInProgress(boolean isPartialRefund) {
         if (isPartialRefund) {
-            this.paymentState = PaymentState.PAYMENT_PARTIAL_REFUND_IN_PROGRESS;
+            this.paymentState = PaymentState.PARTIAL_REFUND_IN_PROGRESS;
             return;
         }
-        this.paymentState = PaymentState.PAYMENT_REFUND_IN_PROGRESS;
+        this.paymentState = PaymentState.REFUND_IN_PROGRESS;
     }
 
     public void complete() {
-        if (this.paymentState == PaymentState.PAYMENT_COMPLETED) {
+        if (this.paymentState == PaymentState.PAID) {
             return;
         }
-        this.paymentState = PaymentState.PAYMENT_COMPLETED;
+        this.paymentState = PaymentState.PAID;
     }
 }
