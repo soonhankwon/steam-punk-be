@@ -7,6 +7,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 @RequiredArgsConstructor
@@ -16,7 +17,7 @@ public class EmailValidator implements ConstraintValidator<EmailCheck, String> {
 
     @Override
     public boolean isValid(String email, ConstraintValidatorContext context) {
-        if (email == null || email.isEmpty()) {
+        if (!StringUtils.hasText(email)) {
             throw new IllegalArgumentException("email can't null or empty");
         }
         if (userRepository.existsByEmail(email)) {
