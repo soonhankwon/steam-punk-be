@@ -4,10 +4,10 @@ import dev.steampunkpayment.dto.request.PaymentAddRequest;
 import dev.steampunkpayment.dto.request.PaymentExecuteRequest;
 import dev.steampunkpayment.dto.response.PaymentAddResponse;
 import dev.steampunkpayment.dto.response.PaymentGetResponse;
+import dev.steampunkpayment.dto.response.PaymentsGetResponse;
 import dev.steampunkpayment.dto.response.RefundProgressAddResponse;
 import dev.steampunkpayment.dto.response.RefundProgressGetResponse;
 import dev.steampunkpayment.service.PaymentService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -59,8 +60,9 @@ public class PaymentController {
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<List<PaymentGetResponse>> getUserPayments(@PathVariable Long userId) {
-        List<PaymentGetResponse> res = paymentService.findUserPayments(userId);
+    public ResponseEntity<PaymentsGetResponse> getUserPayments(@PathVariable Long userId,
+                                                               @RequestParam(value = "page_number") int pageNumber) {
+        PaymentsGetResponse res = paymentService.findUserPayments(userId, pageNumber);
         return ResponseEntity.ok(res);
     }
 }
