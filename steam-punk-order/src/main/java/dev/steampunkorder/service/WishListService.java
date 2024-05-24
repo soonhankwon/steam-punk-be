@@ -3,6 +3,7 @@ package dev.steampunkorder.service;
 import dev.steampunkorder.common.enumtype.ErrorCode;
 import dev.steampunkorder.common.exception.ApiException;
 import dev.steampunkorder.domain.WishList;
+import dev.steampunkorder.dto.WishListDTO;
 import dev.steampunkorder.dto.request.WishListAddRequest;
 import dev.steampunkorder.dto.request.WishListDeleteRequest;
 import dev.steampunkorder.dto.response.ProductsExistsCheckResponse;
@@ -47,17 +48,17 @@ public class WishListService {
 
     @Transactional(readOnly = true)
     public WishListGetResponse getWishList(Long userId) {
-        List<Long> productIds = wishListRepository.findAllByUserId(userId)
+        List<WishListDTO> wishListDTOS = wishListRepository.findAllByUserId(userId)
                 .stream()
-                .map(WishList::getProductId)
+                .map(WishListDTO::from)
                 .toList();
 
-        return WishListGetResponse.of(userId, productIds);
+        return WishListGetResponse.of(userId, wishListDTOS);
     }
 
     @Transactional
     public WishListDeleteResponse deleteWishList(WishListDeleteRequest request) {
-        WishList wishList = wishListRepository.findByUserIdAndProductId(request.userId(), request.productId())
+        WishList wishList = wishListRepository.findByIdAndUserId(request.wishListId(), request.userId())
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_PRODUCT_ID_BY_USER));
         wishListRepository.delete(wishList);
         return WishListDeleteResponse.ofSuccess();
