@@ -3,7 +3,7 @@ package dev.steampunkproduct.dto.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.steampunkproduct.domain.Product;
 import dev.steampunkproduct.domain.ProductDiscountPolicy;
-import dev.steampunkproduct.domain.ProductState;
+import dev.steampunkproduct.enumtype.ProductState;
 import java.util.List;
 import java.util.Objects;
 

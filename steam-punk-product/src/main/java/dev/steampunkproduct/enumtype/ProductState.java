@@ -1,4 +1,4 @@
-package dev.steampunkproduct.domain;
+package dev.steampunkproduct.enumtype;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,7 @@
 package dev.steampunkproduct.domain;
 
 import dev.steampunkproduct.dto.request.ProductAddRequest;
+import dev.steampunkproduct.enumtype.ProductState;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

@@ -2,7 +2,7 @@ package dev.steampunkproduct.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.steampunkproduct.domain.ProductDiscountPolicy;
-import dev.steampunkproduct.domain.ProductState;
+import dev.steampunkproduct.enumtype.ProductState;
 import java.util.List;
 
 public record ProductAddRequest(

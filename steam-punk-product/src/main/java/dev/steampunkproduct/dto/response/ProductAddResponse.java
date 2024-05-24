@@ -3,7 +3,7 @@ package dev.steampunkproduct.dto.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.steampunkproduct.domain.Product;
 import dev.steampunkproduct.domain.ProductDiscountPolicy;
-import dev.steampunkproduct.domain.ProductState;
+import dev.steampunkproduct.enumtype.ProductState;
 
 public record ProductAddResponse(
         String name,
