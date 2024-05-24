@@ -10,7 +10,7 @@ import java.util.List;
 public record OrderGetResponse(
         @JsonProperty("meta")
         OrderMetaData orderMetaData,
-        @JsonProperty("document")
+        @JsonProperty("documents")
         List<OrderProductDTO> orderProducts
 ) {
     public record OrderMetaData(
