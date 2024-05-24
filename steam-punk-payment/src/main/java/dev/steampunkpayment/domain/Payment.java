@@ -49,7 +49,7 @@ public class Payment extends BaseTimeEntity {
         return new Payment(
                 request.userId(),
                 request.orderId(),
-                orderInfo.totalPrice()
+                orderInfo.orderMetaData().totalPrice()
         );
     }
 
