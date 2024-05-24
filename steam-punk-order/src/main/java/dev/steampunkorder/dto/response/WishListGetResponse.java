@@ -7,7 +7,7 @@ import java.util.List;
 public record WishListGetResponse(
         @JsonProperty("user_id")
         Long userId,
-        @JsonProperty("document")
+        @JsonProperty("documents")
         List<WishListDTO> wishListDTOS
 ) {
     public static WishListGetResponse of(Long userId, List<WishListDTO> wishListDTOS) {
