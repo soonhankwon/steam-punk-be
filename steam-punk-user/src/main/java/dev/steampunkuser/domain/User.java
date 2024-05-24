@@ -72,7 +72,7 @@ public class User extends BaseTimeEntity {
 
     public void decreasePoint(UserPointUpdateRequest request) {
         Long requestPoint = request.point();
-        if (requestPoint < 0) {
+        if (requestPoint < MIN_POINT) {
             throw new IllegalArgumentException("음수는 허용되지 않습니다.");
         }
         if (requestPoint > this.point) {
@@ -83,7 +83,7 @@ public class User extends BaseTimeEntity {
 
     public void increasePoint(UserPointUpdateRequest request) {
         Long requestPoint = request.point();
-        if (requestPoint < 0) {
+        if (requestPoint < MIN_POINT) {
             throw new IllegalArgumentException("음수는 허용되지 않습니다.");
         }
         this.point += requestPoint;
