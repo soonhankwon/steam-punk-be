@@ -7,15 +7,21 @@ import dev.steampunkpayment.dto.request.PaymentAddRequest;
 import java.util.List;
 
 public record OrderInfo(
-        @JsonProperty("order_id")
-        Long orderId,
-        @JsonProperty("user_id")
-        Long userId,
-        @JsonProperty("total_price")
-        Long totalPrice,
-        @JsonProperty("order_products")
+        @JsonProperty("meta")
+        OrderMetaData orderMetaData,
+        @JsonProperty("documents")
         List<OrderProductInfo> orderProductInfos
 ) {
+    public record OrderMetaData(
+            @JsonProperty("order_id")
+            Long orderId,
+            @JsonProperty("user_id")
+            Long userId,
+            @JsonProperty("total_price")
+            Long totalPrice
+    ) {
+    }
+
     public void validate(PaymentAddRequest request) {
         if (!isRequestUserIdEqualsOrderInfoUserId(request)) {
             throw new ApiException(ErrorCode.INVALID_REQUEST_ORDER_USER_ID);
@@ -23,6 +29,6 @@ public record OrderInfo(
     }
 
     private boolean isRequestUserIdEqualsOrderInfoUserId(PaymentAddRequest request) {
-        return request.userId().equals(this.userId());
+        return request.userId().equals(this.orderMetaData.userId());
     }
 }
