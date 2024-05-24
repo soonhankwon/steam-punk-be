@@ -1,8 +1,8 @@
 package dev.steampunkorder.enumtype;
 
 public enum OrderProductState {
-    ON_SALE_EVENT,
-    ON_SALE_LIMITED_STOCK_EVENT,
-    LIMITED_STOCK_EVENT,
+    ON_SALE,
+    ON_SALE_LIMITED_STOCK,
+    LIMITED_STOCK,
     REGULAR
 }

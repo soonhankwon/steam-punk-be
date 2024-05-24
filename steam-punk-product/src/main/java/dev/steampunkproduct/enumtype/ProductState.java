@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ProductState {
 
-    ON_SALE_EVENT,
-    ON_SALE_LIMITED_STOCK_EVENT,
-    LIMITED_STOCK_EVENT,
+    ON_SALE,
+    ON_SALE_LIMITED_STOCK,
+    LIMITED_STOCK,
     REGULAR
 }

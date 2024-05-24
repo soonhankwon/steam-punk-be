@@ -100,8 +100,8 @@ public class ProductService {
                     );
                 });
         // 한정수량세일 또는 한정수량 이벤트 상품은 실시간 재고 서비스 등록
-        if (requestProductState == ProductState.ON_SALE_LIMITED_STOCK_EVENT
-                || requestProductState == ProductState.LIMITED_STOCK_EVENT) {
+        if (requestProductState == ProductState.ON_SALE_LIMITED_STOCK
+                || requestProductState == ProductState.LIMITED_STOCK) {
             ProductStockAddRequest productStockAddRequest = ProductStockAddRequest.of(product.getId(),
                     request.stockQuantity());
             addProductStock(productStockAddRequest);
