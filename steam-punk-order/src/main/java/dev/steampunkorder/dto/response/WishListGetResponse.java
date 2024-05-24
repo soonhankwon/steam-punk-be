@@ -1,18 +1,19 @@
 package dev.steampunkorder.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.steampunkorder.dto.WishListDTO;
 import java.util.List;
 
 public record WishListGetResponse(
         @JsonProperty("user_id")
         Long userId,
-        @JsonProperty("product_ids")
-        List<Long> productIds
+        @JsonProperty("document")
+        List<WishListDTO> wishListDTOS
 ) {
-    public static WishListGetResponse of(Long userId, List<Long> productIds) {
+    public static WishListGetResponse of(Long userId, List<WishListDTO> wishListDTOS) {
         return new WishListGetResponse(
                 userId,
-                productIds
+                wishListDTOS
         );
     }
 }
