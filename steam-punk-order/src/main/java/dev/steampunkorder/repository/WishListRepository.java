@@ -12,5 +12,5 @@ public interface WishListRepository extends JpaRepository<WishList, Long> {
 
     boolean existsByUserIdAndProductId(Long userId, Long productId);
 
-    Optional<WishList> findByUserIdAndProductId(Long userId, Long productId);
+    Optional<WishList> findByIdAndUserId(Long wishListId, Long userId);
 }
