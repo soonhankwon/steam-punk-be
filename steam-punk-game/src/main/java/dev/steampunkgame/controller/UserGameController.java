@@ -6,7 +6,6 @@ import dev.steampunkgame.dto.response.UserGameAddResponse;
 import dev.steampunkgame.dto.response.UserGameHistoryGetResponse;
 import dev.steampunkgame.dto.response.UserGamePlayResponse;
 import dev.steampunkgame.service.UserGameService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +26,8 @@ public class UserGameController {
     private final UserGameService userGameService;
 
     @PostMapping
-    public ResponseEntity<List<UserGameAddResponse>> addUserGame(@RequestBody UserGameAddRequest request) {
-        List<UserGameAddResponse> res = userGameService.addUserGame(request);
+    public ResponseEntity<UserGameAddResponse> addUserGame(@RequestBody UserGameAddRequest request) {
+        UserGameAddResponse res = userGameService.addUserGame(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
