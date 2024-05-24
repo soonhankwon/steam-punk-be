@@ -8,10 +8,13 @@ import dev.steampunkpayment.domain.PaymentProduct;
 import dev.steampunkpayment.domain.RefundPolicy;
 import dev.steampunkpayment.domain.UserGamePlayHistoryInfo;
 import dev.steampunkpayment.domain.UserPointInfo;
+import dev.steampunkpayment.dto.PaymentDTO;
 import dev.steampunkpayment.dto.request.PaymentAddRequest;
 import dev.steampunkpayment.dto.request.PaymentExecuteRequest;
 import dev.steampunkpayment.dto.response.PaymentAddResponse;
 import dev.steampunkpayment.dto.response.PaymentGetResponse;
+import dev.steampunkpayment.dto.response.PaymentsGetResponse;
+import dev.steampunkpayment.dto.response.PaymentsGetResponse.PaymentMetaData;
 import dev.steampunkpayment.dto.response.RefundProgressAddResponse;
 import dev.steampunkpayment.dto.response.RefundProgressGetResponse;
 import dev.steampunkpayment.enumtype.OrderProductState;
@@ -22,9 +25,10 @@ import dev.steampunkpayment.repository.PaymentRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,6 +38,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 @Service
 public class PaymentService {
+
+    private static final int PAGE_SIZE = 10;
 
     private final PaymentRepository paymentRepository;
     private final PaymentProductRepository paymentProductRepository;
@@ -202,13 +208,21 @@ public class PaymentService {
 
         return RefundProgressGetResponse.of(totalRefundPrice, payment);
     }
-
-    //TODO 유저의 결제정보가 많은 경우 대비 페이지네이션 필요
+    
     @Transactional(readOnly = true)
-    public List<PaymentGetResponse> findUserPayments(Long userId) {
-        return paymentRepository.findAllByUserId(userId)
+    public PaymentsGetResponse findUserPayments(Long userId, int pageNumber) {
+        PageRequest pageRequest = PageRequest.of(pageNumber, PAGE_SIZE);
+        Page<Payment> paymentPage = paymentRepository.findAllByUserId(userId, pageRequest);
+        PaymentMetaData paymentMetaData = new PaymentMetaData(
+                userId,
+                paymentPage.getTotalElements(),
+                paymentPage.getTotalPages(),
+                paymentPage.isLast()
+        );
+        List<PaymentDTO> paymentDTOS = paymentPage
                 .stream()
-                .map(PaymentGetResponse::from)
-                .collect(Collectors.toList());
+                .map(PaymentDTO::from)
+                .toList();
+        return PaymentsGetResponse.of(paymentMetaData, paymentDTOS);
     }
 }
