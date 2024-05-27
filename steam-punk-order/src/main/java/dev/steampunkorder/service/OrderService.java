@@ -6,10 +6,12 @@ import dev.steampunkorder.domain.Order;
 import dev.steampunkorder.domain.OrderProduct;
 import dev.steampunkorder.domain.ProductInfo;
 import dev.steampunkorder.dto.request.OrderAddRequest;
+import dev.steampunkorder.dto.request.OrderProductDeleteRequest;
 import dev.steampunkorder.dto.request.OrderUpdateRequest;
 import dev.steampunkorder.dto.response.OrderAddResponse;
 import dev.steampunkorder.dto.response.OrderGetResponse;
 import dev.steampunkorder.dto.response.OrderGetResponse.OrderProductDTO;
+import dev.steampunkorder.dto.response.OrderProductDeleteResponse;
 import dev.steampunkorder.dto.response.OrderUpdateResponse;
 import dev.steampunkorder.enumtype.OrderProductState;
 import dev.steampunkorder.enumtype.OrderState;
@@ -108,5 +110,17 @@ public class OrderService {
                 .retrieve()
                 .bodyToMono(ProductInfo.class)
                 .block();
+    }
+
+    @Transactional
+    public OrderProductDeleteResponse deleteOrderProduct(Long orderProductId, OrderProductDeleteRequest request) {
+        Order order = orderRepository.findById(request.orderId())
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_ORDER_ID));
+
+        order.validateUser(request.userId());
+        OrderProduct orderProduct = orderProductRepository.findById(orderProductId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_ORDER_PRODUCT_ID));
+        orderProductRepository.delete(orderProduct);
+        return OrderProductDeleteResponse.ofSuccess();
     }
 }
