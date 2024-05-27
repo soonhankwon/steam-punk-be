@@ -41,14 +41,23 @@ public class ProductService {
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_PRODUCT_ID));
 
         List<ProductCategory> productCategories = productCategoryRepository.findAllByProduct(product);
+        List<String> categories = getCategoriesString(productCategories);
+        return ProductGetResponse.of(product, categories);
+    }
+
+    /**
+     * @param productCategories 상품 카테고리 리스트
+     * @return 카테고리 문자열 리스트
+     */
+    private List<String> getCategoriesString(List<ProductCategory> productCategories) {
         List<String> categories = new ArrayList<>();
-        productCategories.forEach(i -> {
-            Category category = categoryRepository.findById(i.getCategoryId())
+        productCategories.forEach(pc -> {
+            // 카테고리 레포지토리에서 조회 후 없으면 예외를 던짐
+            Category category = categoryRepository.findById(pc.getCategoryId())
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_CATEGORY_ID));
             categories.add(category.getName());
         });
-
-        return ProductGetResponse.of(product, categories);
+        return categories;
     }
 
     @Transactional(readOnly = true)
@@ -65,12 +74,7 @@ public class ProductService {
         List<ProductGetResponse> res = new ArrayList<>();
         products.forEach(p -> {
             List<ProductCategory> productCategories = productCategoryRepository.findAllByProduct(p);
-            List<String> categories = new ArrayList<>();
-            productCategories.forEach(pc -> {
-                Category category = categoryRepository.findById(pc.getCategoryId())
-                        .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_CATEGORY_ID));
-                categories.add(category.getName());
-            });
+            List<String> categories = getCategoriesString(productCategories);
             res.add(ProductGetResponse.of(p, categories));
         });
         return ProductsGetResponse.of(metaData, res);
