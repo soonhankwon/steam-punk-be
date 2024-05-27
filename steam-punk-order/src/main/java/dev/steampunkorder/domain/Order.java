@@ -46,12 +46,15 @@ public class Order extends BaseTimeEntity {
     }
 
     public void updateState(OrderState orderState) {
-        if (this.orderState == orderState) {
-            return;
-        }
         if (this.orderState == OrderState.ORDER_PAID) {
             throw new ApiException(ErrorCode.CANT_UPDATE_STATE_OF_PAID_PRODUCT);
         }
         this.orderState = orderState;
+    }
+
+    public void validateUser(Long userId) {
+        if (!this.userId.equals(userId)) {
+            throw new ApiException(ErrorCode.NOT_USER_ORDER);
+        }
     }
 }
