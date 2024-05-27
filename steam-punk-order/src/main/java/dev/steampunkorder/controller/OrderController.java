@@ -1,14 +1,17 @@
 package dev.steampunkorder.controller;
 
 import dev.steampunkorder.dto.request.OrderAddRequest;
+import dev.steampunkorder.dto.request.OrderProductDeleteRequest;
 import dev.steampunkorder.dto.request.OrderUpdateRequest;
 import dev.steampunkorder.dto.response.OrderAddResponse;
 import dev.steampunkorder.dto.response.OrderGetResponse;
+import dev.steampunkorder.dto.response.OrderProductDeleteResponse;
 import dev.steampunkorder.dto.response.OrderUpdateResponse;
 import dev.steampunkorder.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,5 +45,12 @@ public class OrderController {
                                                            @RequestBody OrderUpdateRequest request) {
         OrderUpdateResponse res = orderService.updateOrder(orderId, request);
         return ResponseEntity.ok().body(res);
+    }
+
+    @DeleteMapping("/{orderProductId}")
+    public ResponseEntity<OrderProductDeleteResponse> deleteOrderProduct(@PathVariable Long orderProductId,
+                                                                         @RequestBody OrderProductDeleteRequest request) {
+        OrderProductDeleteResponse res = orderService.deleteOrderProduct(orderProductId, request);
+        return ResponseEntity.ok(res);
     }
 }
