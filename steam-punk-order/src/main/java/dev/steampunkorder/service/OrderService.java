@@ -40,17 +40,13 @@ public class OrderService {
         order = orderRepository.save(order);
 
         // 이미 구매한 이력이 있는 상품을 재주문할 수 없음
-        //TODO order & orderProduct 테이블을 조인해서 이미 구매한 상품 ID 리스트를 바로 조회하도록 쿼리 개선 필요
-        List<Order> paidOrders = orderRepository.findByUserIdAndOrderState(userId,
-                OrderState.ORDER_PAID);
-
+        List<Order> paidOrders = orderRepository.findByUserIdAndOrderState(userId, OrderState.ORDER_PAID);
         Set<Long> paidProductIdsSet = new HashSet<>();
-        paidOrders.forEach(o -> {
-            List<OrderProduct> paidOrderProducts = orderProductRepository.findAllByOrderId(o.getId());
-            paidOrderProducts.stream()
-                    .map(OrderProduct::getProductId)
-                    .forEach(paidProductIdsSet::add);
-        });
+        paidOrders.stream()
+                .map(o -> orderProductRepository.findAllByOrderId(o.getId()))
+                .forEach(paidOrderProducts -> paidOrderProducts.stream()
+                        .map(OrderProduct::getProductId)
+                        .forEach(paidProductIdsSet::add));
 
         List<OrderProduct> orderProducts = new ArrayList<>();
         Order finalOrder = order;
