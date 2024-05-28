@@ -1,6 +1,5 @@
 package dev.steampunkorder.controller;
 
-import dev.steampunkorder.dto.request.OrderAddRequest;
 import dev.steampunkorder.dto.request.OrderProductDeleteRequest;
 import dev.steampunkorder.dto.request.OrderUpdateRequest;
 import dev.steampunkorder.dto.response.OrderAddResponse;
@@ -27,10 +26,10 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    // 위시리스트의 상품만 주문이 가능함(비즈니스 플로우)
     @PostMapping("/{userId}")
-    public ResponseEntity<OrderAddResponse> addOrder(@PathVariable Long userId,
-                                                     @RequestBody OrderAddRequest request) {
-        OrderAddResponse res = orderService.addOrder(userId, request);
+    public ResponseEntity<OrderAddResponse> addOrder(@PathVariable Long userId) {
+        OrderAddResponse res = orderService.addOrder(userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
