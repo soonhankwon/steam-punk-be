@@ -19,7 +19,7 @@ public class StockTransactionService {
     @Transactional
     public ProductStock decreaseByTransaction(Long productId) {
         // 비관적락 적용 - 쓰기 락
-        ProductStock productStock = productStockRepository.findByProductId(productId)
+        ProductStock productStock = productStockRepository.findByProductIdWithLock(productId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXIST_PRODUCT_ID));
         productStock.decreaseStock();
         log.info("realStock={}", productStock.getStockQuantity());
