@@ -5,6 +5,7 @@ import dev.steampunkproduct.common.exception.ApiException;
 import dev.steampunkproduct.domain.Category;
 import dev.steampunkproduct.domain.Product;
 import dev.steampunkproduct.domain.ProductCategory;
+import dev.steampunkproduct.domain.ProductStockInfo;
 import dev.steampunkproduct.dto.request.ProductAddRequest;
 import dev.steampunkproduct.dto.request.ProductStockAddRequest;
 import dev.steampunkproduct.dto.response.ProductAddResponse;
@@ -40,9 +41,29 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_PRODUCT_ID));
 
+        ProductState productState = product.getProductState();
+        ProductStockInfo productStockInfo = getProductStockInfoCanBeNull(productId, productState);
         List<ProductCategory> productCategories = productCategoryRepository.findAllByProduct(product);
         List<String> categories = getCategoriesString(productCategories);
-        return ProductGetResponse.of(product, categories);
+        return ProductGetResponse.of(product, categories, productStockInfo);
+    }
+
+    // 상품이 한정 판매 또는 한정 세일 판매가 아닌 경우 null을 리턴함
+    private ProductStockInfo getProductStockInfoCanBeNull(Long productId, ProductState productState) {
+        ProductStockInfo productStockInfo = null;
+        if (productState == ProductState.LIMITED_STOCK || productState == ProductState.ON_SALE_LIMITED_STOCK) {
+            productStockInfo = getProductStock(productId);
+        }
+        return productStockInfo;
+    }
+
+    private ProductStockInfo getProductStock(Long productId) {
+        return WebClient.create()
+                .get()
+                .uri("http://localhost:8080/api/v1/stock/{productId}", productId)
+                .retrieve()
+                .bodyToMono(ProductStockInfo.class)
+                .block();
     }
 
     /**
@@ -75,7 +96,9 @@ public class ProductService {
         products.forEach(p -> {
             List<ProductCategory> productCategories = productCategoryRepository.findAllByProduct(p);
             List<String> categories = getCategoriesString(productCategories);
-            res.add(ProductGetResponse.of(p, categories));
+            ProductState productState = p.getProductState();
+            ProductStockInfo productStockInfo = getProductStockInfoCanBeNull(p.getId(), productState);
+            res.add(ProductGetResponse.of(p, categories, productStockInfo));
         });
         return ProductsGetResponse.of(metaData, res);
     }
