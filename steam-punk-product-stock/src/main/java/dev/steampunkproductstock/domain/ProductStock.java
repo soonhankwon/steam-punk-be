@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -17,7 +18,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "product_stock")
+@Table(name = "product_stock", indexes = {
+        @Index(name = "ps_product_id_idx", columnList = "product_id")
+})
 public class ProductStock extends BaseTimeEntity {
 
     private static final long MIN_STOCK_QUANTITY = 0L;
