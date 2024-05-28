@@ -5,7 +5,7 @@ import dev.steampunkorder.common.exception.ApiException;
 import dev.steampunkorder.domain.Order;
 import dev.steampunkorder.domain.OrderProduct;
 import dev.steampunkorder.domain.ProductInfo;
-import dev.steampunkorder.dto.request.OrderAddRequest;
+import dev.steampunkorder.domain.WishList;
 import dev.steampunkorder.dto.request.OrderProductDeleteRequest;
 import dev.steampunkorder.dto.request.OrderUpdateRequest;
 import dev.steampunkorder.dto.response.OrderAddResponse;
@@ -14,13 +14,11 @@ import dev.steampunkorder.dto.response.OrderGetResponse.OrderProductDTO;
 import dev.steampunkorder.dto.response.OrderProductDeleteResponse;
 import dev.steampunkorder.dto.response.OrderUpdateResponse;
 import dev.steampunkorder.enumtype.OrderProductState;
-import dev.steampunkorder.enumtype.OrderState;
 import dev.steampunkorder.repository.OrderProductRepository;
 import dev.steampunkorder.repository.OrderRepository;
+import dev.steampunkorder.repository.WishListRepository;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,31 +31,29 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
+    private final WishListRepository wishListRepository;
 
     @Transactional
-    public OrderAddResponse addOrder(Long userId, OrderAddRequest request) {
+    public OrderAddResponse addOrder(Long userId) {
         Order order = Order.ofPendingOrder(userId);
-        order = orderRepository.save(order);
+        final Order finalOrder = orderRepository.save(order);
+        /*
+         * 이미 구매한 이력이 있는 상품을 재주문할 수 없음 -> 위시리스트에 담아논 상품만 주문이 가능함
+         * 위시리스트에 상품을 담을 때 구매 이력이 있으면 예외처리
+         */
 
-        // 이미 구매한 이력이 있는 상품을 재주문할 수 없음
-        List<Order> paidOrders = orderRepository.findByUserIdAndOrderState(userId, OrderState.ORDER_PAID);
-        Set<Long> paidProductIdsSet = new HashSet<>();
-        paidOrders.stream()
-                .map(o -> orderProductRepository.findAllByOrderId(o.getId()))
-                .forEach(paidOrderProducts -> paidOrderProducts.stream()
-                        .map(OrderProduct::getProductId)
-                        .forEach(paidProductIdsSet::add));
+        // 유저의 현재 위시리스트 상품 ID 목록 조회
+        List<Long> wishListProductIds = wishListRepository.findAllByUserId(userId)
+                .stream()
+                .map(WishList::getProductId)
+                .toList();
 
-        List<OrderProduct> orderProducts = new ArrayList<>();
-        Order finalOrder = order;
         // productId가 중복되어서 주문되면 안됨
-        request.productIds()
+        List<OrderProduct> orderProducts = new ArrayList<>();
+        wishListProductIds
                 .stream()
                 .distinct()
                 .forEach(productId -> {
-                    if (paidProductIdsSet.contains(productId)) {
-                        throw new ApiException(ErrorCode.EXISTS_PAID_HISTORY_PRODUCT);
-                    }
                     ProductInfo productInfo = getProductInfo(productId);
                     // 주문한 상품의 할인 및 한정 판매 상태
                     OrderProductState orderProductState = productInfo.productState();
