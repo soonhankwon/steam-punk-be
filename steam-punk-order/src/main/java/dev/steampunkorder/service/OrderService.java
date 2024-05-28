@@ -39,19 +39,16 @@ public class OrderService {
         final Order finalOrder = orderRepository.save(order);
         /*
          * 이미 구매한 이력이 있는 상품을 재주문할 수 없음 -> 위시리스트에 담아논 상품만 주문이 가능함
-         * 위시리스트에 상품을 담을 때 구매 이력이 있으면 예외처리
+         * 위시리스트에 상품을 담을 때 구매 이력이 있으면 예외처리됨
          */
-
-        // 유저의 현재 위시리스트 상품 ID 목록 조회
-        List<Long> wishListProductIds = wishListRepository.findAllByUserId(userId)
+        List<WishList> wishLists = wishListRepository.findAllByUserId(userId)
                 .stream()
-                .map(WishList::getProductId)
                 .toList();
 
         // productId가 중복되어서 주문되면 안됨
         List<OrderProduct> orderProducts = new ArrayList<>();
-        wishListProductIds
-                .stream()
+        wishLists.stream()
+                .map(WishList::getProductId)
                 .distinct()
                 .forEach(productId -> {
                     ProductInfo productInfo = getProductInfo(productId);
@@ -64,8 +61,10 @@ public class OrderService {
                             orderProductState)
                     );
                 });
-
+        // 주문상품 목록 INSERT
         orderProductRepository.saveAll(orderProducts);
+        // 주문성공 후 위시리스트에서는 삭제
+        wishListRepository.deleteAll(wishLists);
         return OrderAddResponse.from(order);
     }
 
