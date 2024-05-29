@@ -56,4 +56,12 @@ public class StockService {
         }
         return ProductStockGetResponse.from(productStock);
     }
+
+    @Transactional
+    public ProductStockGetResponse increaseProductStock(Long productId) {
+        ProductStock productStock = productStockRepository.findByProductId(productId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXIST_PRODUCT_ID));
+        productStock.increaseStock();
+        return ProductStockGetResponse.from(productStock);
+    }
 }

@@ -20,10 +20,13 @@ import dev.steampunkpayment.dto.response.RefundProgressGetResponse;
 import dev.steampunkpayment.enumtype.OrderProductState;
 import dev.steampunkpayment.enumtype.PaymentProductState;
 import dev.steampunkpayment.event.publish.PaymentCompletedEvent;
+import dev.steampunkpayment.event.publish.PaymentFailedEvent;
 import dev.steampunkpayment.repository.PaymentProductRepository;
 import dev.steampunkpayment.repository.PaymentRepository;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -58,10 +61,11 @@ public class PaymentService {
         orderInfo.validate(request);
         // 결제 대기 상태의 결제 생성 및 INSERT
         Payment payment = Payment.ofReady(request, orderInfo);
-        payment = paymentRepository.save(payment);
+        final Payment finalPayment = paymentRepository.save(payment);
 
         List<PaymentProduct> paymentProducts = new ArrayList<>();
-        Payment finalPayment = payment;
+        // 한정 판매 상품이 2개인 경우 1개만 감소되고 다른 1개는 실패할 경우를 대비한 상품 ID 집합
+        Set<Long> tempLimitedProductIdsSet = new HashSet<>();
         // 결제대기 상태의 결제 상품목록 INSERT
         orderInfo.orderProductInfos()
                 .forEach(orderProductInfo -> {
@@ -71,7 +75,9 @@ public class PaymentService {
                     if (orderProductState == OrderProductState.LIMITED_STOCK
                             || orderProductState == OrderProductState.ON_SALE_LIMITED_STOCK) {
                         ResponseEntity<Void> res = decreaseProductStock(productId);
+                        tempLimitedProductIdsSet.add(productId);
                         if (res.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR) {
+                            eventPublisher.publishEvent(new PaymentFailedEvent(orderInfo, tempLimitedProductIdsSet));
                             throw new ApiException(ErrorCode.NO_STOCK_ORDER_PRODUCT);
                         }
                     }

@@ -36,9 +36,13 @@ public class ProductStock extends BaseTimeEntity {
     @Column(name = "stock_quantity")
     private Long stockQuantity;
 
+    @Column(name = "max_stock_quantity")
+    private Long maxStockQuantity;
+
     private ProductStock(Long productId, Long stockQuantity) {
         this.productId = productId;
         this.stockQuantity = stockQuantity;
+        this.maxStockQuantity = stockQuantity;
     }
 
     public static ProductStock from(ProductStockAddRequest request) {
@@ -53,5 +57,12 @@ public class ProductStock extends BaseTimeEntity {
             throw new ApiException(ErrorCode.MINIMUM_STOCK_REACHED);
         }
         this.stockQuantity--;
+    }
+
+    public void increaseStock() {
+        if (this.stockQuantity.equals(this.maxStockQuantity)) {
+            throw new ApiException(ErrorCode.MAXIMUM_STOCK_REACHED);
+        }
+        this.stockQuantity++;
     }
 }

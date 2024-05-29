@@ -40,4 +40,10 @@ public class ProductStockController {
         ProductStockGetResponse res = stockService.decreaseProductStock(productId);
         return ResponseEntity.ok(res);
     }
+
+    @PatchMapping("{productId}/increase")
+    public ResponseEntity<ProductStockGetResponse> increaseProductStock(@PathVariable Long productId) {
+        ProductStockGetResponse res = stockService.increaseProductStock(productId);
+        return ResponseEntity.ok(res);
+    }
 }
