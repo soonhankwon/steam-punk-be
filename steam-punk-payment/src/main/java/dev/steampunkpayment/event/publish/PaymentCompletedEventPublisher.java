@@ -1,5 +1,6 @@
 package dev.steampunkpayment.event.publish;
 
+import dev.steampunkpayment.domain.OrderInfo;
 import dev.steampunkpayment.domain.OrderProductInfo;
 import dev.steampunkpayment.dto.request.OrderStateUpdateRequest;
 import dev.steampunkpayment.dto.request.UserGameHistoryAddRequest;
@@ -23,9 +24,10 @@ public class PaymentCompletedEventPublisher {
         Long orderId = paymentCompletedEvent.payment().getOrderId();
         Long userId = paymentCompletedEvent.payment().getUserId();
         Long paidTotalPrice = paymentCompletedEvent.payment().getTotalPrice();
-        assert orderId != null && userId != null;
+        assert orderId != null && userId != null && paidTotalPrice != null;
 
-        List<Long> productIds = paymentCompletedEvent.orderProductInfos()
+        OrderInfo orderInfo = OrderInfo.fromOrderInfoInternalApi(orderId);
+        List<Long> productIds = orderInfo.orderProductInfos()
                 .stream()
                 .map(OrderProductInfo::productId)
                 .collect(Collectors.toList());
