@@ -56,7 +56,7 @@ public class PaymentService {
         if (paymentRepository.existsByOrderId(requestOrderId)) {
             throw new ApiException(ErrorCode.EXISTS_PAYMENT_HISTORY_BY_ORDER_ID);
         }
-        OrderInfo orderInfo = getOrderInfo(requestOrderId);
+        OrderInfo orderInfo = OrderInfo.fromOrderInfoInternalApi(requestOrderId);
         // 유저의 주문인지 밸리데이션
         orderInfo.validate(request);
         // 결제 대기 상태의 결제 생성 및 INSERT
@@ -106,10 +106,9 @@ public class PaymentService {
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_EXISTS_PAYMENT_ID));
 
         // 유저 마이크로 서비스로 유저 포인트 정보 요청
-        UserPointInfo userPointInfo = getUserPointInfo(request.userId());
+        UserPointInfo userPointInfo = UserPointInfo.fromUserPointInfoInternalApi(request.userId());
         // 유저가 주문결제에 충분한 포인트를 가지고 있는지 밸리데이션
         userPointInfo.validatePoint(payment.getTotalPrice());
-        OrderInfo orderInfo = getOrderInfo(payment.getOrderId());
         Long paymentId = payment.getId();
 
         List<PaymentProduct> paymentProducts = paymentProductRepository.findAllByPaymentIdAndPaymentProductState(
@@ -118,26 +117,8 @@ public class PaymentService {
         paymentProducts.forEach(PaymentProduct::paid);
         payment.complete();
 
-        eventPublisher.publishEvent(PaymentCompletedEvent.from(payment, orderInfo.orderProductInfos()));
+        eventPublisher.publishEvent(PaymentCompletedEvent.from(payment));
         return PaymentAddResponse.from(payment);
-    }
-
-    private UserPointInfo getUserPointInfo(Long userId) {
-        return WebClient.create()
-                .get()
-                .uri("http://localhost:8080/api/v1/users/point/{userId}", userId)
-                .retrieve()
-                .bodyToMono(UserPointInfo.class)
-                .block();
-    }
-
-    private OrderInfo getOrderInfo(Long orderId) {
-        return WebClient.create()
-                .get()
-                .uri("http://localhost:8080/api/v1/orders/{orderId}", orderId)
-                .retrieve()
-                .bodyToMono(OrderInfo.class)
-                .block();
     }
 
     @Transactional(readOnly = true)
@@ -163,7 +144,9 @@ public class PaymentService {
         Long userId = payment.getUserId();
         List<UserGamePlayHistoryInfo> userGamePlayHistoryInfos = paymentProducts
                 .stream()
-                .map(paymentProduct -> getUserGamePlayHistory(userId, paymentProduct.getProductId()))
+                .map(paymentProduct ->
+                        UserGamePlayHistoryInfo.ofUserGamePlayHistoryInternalApi(userId, paymentProduct.getProductId())
+                )
                 .toList();
 
         // 정규 환불 정책 적용 - 환불 조건에 충족되는 상품만 결제 환불 진행 상태로 업데이트(환불 IN PROCESS)
@@ -187,16 +170,6 @@ public class PaymentService {
         payment.refundInProgress(isPartialRefund);
         //TODO 환불 신청 후 D+1에 환불 완료(BATCH)
         return RefundProgressAddResponse.of(refundTotalPrice.get(), payment);
-    }
-
-    private UserGamePlayHistoryInfo getUserGamePlayHistory(Long userId, Long productId) {
-        return WebClient.create()
-                .get()
-                .uri("http://localhost:8080/api/v1/games/{userId}?productId={productId}",
-                        userId, productId)
-                .retrieve()
-                .bodyToMono(UserGamePlayHistoryInfo.class)
-                .block();
     }
 
     @Transactional(readOnly = true)
