@@ -131,4 +131,226 @@
 
 ---
 
+### Kaggle 게임 데이터셋 데이터 전처리 및 DB INSERT 배치 작업 성능 개선 → Chunk 기반 Reader, Writer + 멀티스레드 Step 병렬처리로 29.849sec 에서 12.428sec로 개선(개선율 58.36%)
 
+| VER | 배치소요시간 | 이전 버전 대비 개선율 | 적용사항 |
+| --- | --- | --- | --- |
+| 1 | 29.849ms | 0% | ConcurrentHashMap에 필요 데이터 캐싱 및 사용 |
+| 2 | 32.387ms | -8.50% | Chunk 기반 Reader, Writer로 리팩토링 |
+| 3 | 29.129ms | 10.06% | ChunkSize = 100으로 조정 |
+| 4 | 12.428ms | 57.33% | TaskExecutor 적용 Step 병렬처리 |
+
+- 문제상황: 85,103건의 게임 JSON 데이터를 전처리하고 데이터베이스에 INSERT하는 배치작업
+    - 추가적으로 게임-카테고리에 대한 233,132 INSERT 작업 발생
+    - Kaggle 데이터셋의 **특이한 Json구조** 때문에 Custom한 Reader 구현 및 사용
+    - 내부적으로 HashMap을 활용해서 key=카테고리명, value=PK(카테고리_ID) 를 캐싱하여 약 29.849초까지 개선
+    - Chunk 기반 Reader, Writer를 사용하지 않아 병렬처리를 할 수 없는 문제점이 추가적 발생
+
+- 해결방안1: Reader와 Writer를 **Chunk기반으로 리팩토링**
+    - 하지만 32.387sec로 성능 개선 실패 문제 발생
+
+        <details>
+        <summary><strong> CODE - Click! </strong></summary>
+        <div markdown="1">
+        
+        ```java
+                @Slf4j
+                @RequiredArgsConstructor
+                @Configuration
+                public class JsonJobConfig {
+                
+                    private final EntityManagerFactory entityManagerFactory;
+                    private final CategoryRepository categoryRepository;
+                    private static final int CHUNK_SIZE = 100;
+                    private final Set<String> categorySet = new HashSet<>();
+                    private final Map<String, Long> internalCacheStore = new ConcurrentHashMap<>();
+                
+                    @Bean
+                    public Job jsonConvertAndAddDatabaseJob(PlatformTransactionManager transactionManager, JobRepository jobRepository)
+                            throws IOException {
+                        return new JobBuilder("jsonConvertAndAddDatabaseJob", jobRepository)
+                                .start(getDistinctCategoriesStep(transactionManager, jobRepository))
+                                .next(addCategoriesStep(transactionManager, jobRepository))
+                                .next(jsonConvertAndAddDatabaseJobStep(transactionManager, jobRepository))
+                                .build();
+                    }
+                
+                    @Bean
+                    @JobScope
+                    public Step getDistinctCategoriesStep(PlatformTransactionManager transactionManager,
+                                                          JobRepository jobRepository) {
+                        return new StepBuilder("getDistinctCategoriesStep", jobRepository)
+                                .tasklet(readJsonCollectDistinctCategoriesTasklet(), transactionManager)
+                                .build();
+                    }
+                
+                    public Tasklet readJsonCollectDistinctCategoriesTasklet() {
+                        return ((contribution, chunkContext) -> {
+                            readJsonCollectDistinctCategories();
+                            return RepeatStatus.FINISHED;
+                        });
+                    }
+                
+                    private void readJsonCollectDistinctCategories() {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        try {
+                            JsonNode rootNode = objectMapper.readTree(
+                                    new File("/Users/soon/Downloads/archive/games.json"));
+                
+                            Iterator<String> appIds = rootNode.fieldNames();
+                
+                            while (appIds.hasNext()) {
+                                String id = appIds.next();
+                                JsonNode gameNode = rootNode.get(id);
+                                JsonNode genresJsonNode = gameNode.get("genres");
+                
+                                if (genresJsonNode != null && !genresJsonNode.isEmpty()) {
+                                    Iterator<JsonNode> iterator = genresJsonNode.iterator();
+                                    iterator.forEachRemaining(g -> {
+                                        String categoryName = g.asText();
+                                        categorySet.add(categoryName);
+                                    });
+                                }
+                            }
+                        } catch (IOException e) {
+                            throw new RuntimeException("Failed Batch");
+                        }
+                    }
+                
+                    @Bean
+                    @JobScope
+                    public Step addCategoriesStep(PlatformTransactionManager transactionManager,
+                                                  JobRepository jobRepository) {
+                        return new StepBuilder("addCategoriesStep", jobRepository)
+                                .tasklet(addCategoriesTasklet(), transactionManager)
+                                .build();
+                    }
+                
+                    public Tasklet addCategoriesTasklet() {
+                        return ((contribution, chunkContext) -> {
+                            addCategories();
+                            return RepeatStatus.FINISHED;
+                        });
+                    }
+                
+                    private void addCategories() {
+                        categorySet.iterator().forEachRemaining(c -> {
+                            Category category = new Category(c);
+                            category = categoryRepository.save(category);
+                            internalCacheStore.put(category.getName(), category.getId());
+                        });
+                    }
+                
+                    @Bean
+                    public Step jsonConvertAndAddDatabaseJobStep(PlatformTransactionManager transactionManager,
+                                                                 JobRepository jobRepository)
+                            throws IOException {
+                        return new StepBuilder("jsonConvertAndAddDatabaseJobStep", jobRepository)
+                                .<Product, Product>chunk(CHUNK_SIZE, transactionManager)
+                                .reader(jsonProductItemReader())
+                                .writer(jpaProductItemWriter())
+                                .build();
+                    }
+                
+                    @Bean
+                    public ItemReader<Product> jsonProductItemReader() throws IOException {
+                        return new JsonProductItemReader(
+                                "/Users/soon/Downloads/archive/games.json", internalCacheStore);
+                    }
+                
+                    @Bean
+                    public JpaItemWriter<Product> jpaProductItemWriter() {
+                        JpaItemWriter<Product> jpaItemWriter = new JpaItemWriter<>();
+                        jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
+                        return jpaItemWriter;
+                    }
+                }
+                
+        ```
+        </div>
+        </details>
+
+- 해결방안2: ChunkSize = 100으로 조정
+    - 약 29.129초로 개선
+- 해결방안3: Chunk 기반으로 Reader와 Writer를 리팩토링함으로써 **Step을 멀티스레드 병렬처리 적용(TaskExecutor)**
+    - 추가적인 문제점: 병렬처리를 위한 Reader 동기화 처리 문제 발생
+    - Reader(Custom)에 **synchoronized 키워드**를 추가해서 해결
+
+        <details>
+        <summary><strong> CODE - Click! </strong></summary>
+        <div markdown="1">
+        
+        ```java
+            public class JsonProductItemReader implements ItemReader<Product> {
+        
+            private final Iterator<JsonNode> productIterator;
+            private final Map<String, Long> internalCacheMap;
+        
+            public JsonProductItemReader(String filePath, Map<String, Long> cacheMap) throws IOException {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode rootNode = objectMapper.readTree(new File(filePath));
+                this.productIterator = rootNode.elements();
+                this.internalCacheMap = cacheMap;
+            }
+        
+            @Override
+            public synchronized Product read() throws UnexpectedInputException, ParseException, NonTransientResourceException {
+                if (productIterator != null && productIterator.hasNext()) {
+                    JsonNode node = productIterator.next();
+                    String name = node.get("name").asText();
+                    double price = node.get("price").asDouble();
+                    String shortDescription = node.get("short_description").asText();
+                    String headerImage = node.get("header_image").asText();
+                    String webSite = node.get("website").asText();
+                    JsonNode developersJsonNode = node.get("developers");
+                    String developer;
+                    if (developersJsonNode == null || developersJsonNode.isEmpty()) {
+                        developer = "Anonymous";
+                    } else {
+                        developer = developersJsonNode.get(0).asText();
+                    }
+                    Product product = new Product(name, price, shortDescription, headerImage, webSite, developer);
+                    JsonNode genresJsonNode = node.get("genres");
+                    if (genresJsonNode != null && !genresJsonNode.isEmpty()) {
+                        Iterator<JsonNode> iterator = genresJsonNode.iterator();
+                        iterator.forEachRemaining(g -> {
+                            String categoryName = g.asText();
+                            Long categoryId = internalCacheMap.get(categoryName);
+                            product.getProductCategories().add(new ProductCategory(product, categoryId));
+                        });
+                    }
+                    return product;
+                }
+                return null;
+            }
+        }    
+        ```
+        </div>
+        </details>
+
+  - Step에 TaskExecutor 적용
+        <details>
+        <summary><strong> CODE - Click! </strong></summary>
+        <div markdown="1">
+        
+        ```java
+        @Bean
+            @JobScope
+            public Step jsonConvertAndAddDatabaseJobStep(PlatformTransactionManager transactionManager,
+                                                         JobRepository jobRepository)
+                    throws IOException {
+                return new StepBuilder("jsonConvertAndAddDatabaseJobStep", jobRepository)
+                        .<Product, Product>chunk(CHUNK_SIZE, transactionManager)
+                        .reader(jsonProductItemReader())
+                        .writer(jpaProductItemWriter())
+                        .taskExecutor(taskExecutor())
+                        .build();
+            } 
+        ```
+        </div>
+        </details>
+- 배치 결과 검증
+    ```java
+    Job: [SimpleJob: [name=jsonConvertAndAddDatabaseJob]] completed with the following parameters: [{'version':'{value=7, type=class java.lang.String, identifying=true}'}] 
+    and the following status: [COMPLETED] in 12s428ms
+    ```
