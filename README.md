@@ -2,7 +2,7 @@
 
 - 게임 개발사와 사용자가 **콘솔게임**을 거래하는 가상 게임 플랫폼 웹 애플리케이션 백엔드API 입니다.
 - **게임 한정 수량 할인 판매 이벤트**와 같은 대량 트래픽 상황에 스케일 아웃이 용이하도록 **MSA 아키텍처**로 설계했습니다.
-- Kaggle의 최신 스팀 게임 데이터셋(약 86,000건)을 활용해서 API 테스트를 진행했습니다.
+- Kaggle의 최신 스팀 게임 데이터셋(약 85,000건)을 활용해서 API 테스트를 진행했습니다.
   - https://www.kaggle.com/datasets/fronkongames/steam-games-dataset
 
 ## Table Of Contents
