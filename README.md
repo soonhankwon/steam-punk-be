@@ -2,11 +2,12 @@
 
 - 게임 개발사와 사용자가 **콘솔게임**을 거래하는 가상 게임 플랫폼 웹 애플리케이션 백엔드API 입니다.
 - **게임 한정 수량 할인 판매 이벤트**와 같은 대량 트래픽 상황에 스케일 아웃이 용이하도록 **MSA 아키텍처**로 설계했습니다.
-- Kaggle의 최신 스팀 게임 데이터셋을 활용해서 API 테스트를 진행했습니다.
+- Kaggle의 최신 스팀 게임 데이터셋(약 86,000건)을 활용해서 API 테스트를 진행했습니다.
+  - https://www.kaggle.com/datasets/fronkongames/steam-games-dataset
 
 ## Table Of Contents
 - [유저스토리](#유저스토리)
-- [주요기능 및 API 문서](#주요기능-및-API-문서)
+- [주요기능 및 API 문서](#주요기능-및-api-문서)
 - [아키텍처](#아키텍처)
 - [ERD](#erd)
 - [핵심문제 해결과정 및 전략](#핵심문제-해결과정-및-전략)
@@ -18,7 +19,7 @@
 - 한정 판매 또는 **한정 세일 판매 이벤트** 게임을 선착순으로 구매할 수 있습니다.
 - 게임 플레이를 통해 게임을 플레이 할 수 있으며, 이력을 조회할 수 있습니다.
 
-## 주요기능 및 API 문서
+## 주요기능 및 api 문서
 - [API 문서(Notion) - Click!](https://www.notion.so/API-a44f03836b054ba680ee623a725329ae?pvs=4)
 
 | 마이크로서비스 | 기능 |
@@ -38,7 +39,12 @@
 ![steam-punk-arch](https://github.com/soonhankwon/steam-punk-be/assets/113872320/d039e644-f0ef-4730-ae50-0cfbccf8602f")
 
 ## erd
+<details>
+<summary><strong> ERD - Click! </strong></summary>
+<div markdown="1">
 ![erd](https://github.com/soonhankwon/steam-punk-be/assets/113872320/2a02c8da-625b-4055-9841-9dd519e81a54)
+</div>
+</details>
 
 ## 핵심문제 해결과정 및 전략
 
