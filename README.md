@@ -42,6 +42,7 @@
 <details>
 <summary><strong> ERD - Click! </strong></summary>
 <div markdown="1">
+  
 ![erd](https://github.com/soonhankwon/steam-punk-be/assets/113872320/2a02c8da-625b-4055-9841-9dd519e81a54)
 </div>
 </details>
