@@ -50,5 +50,34 @@
 ## 핵심문제 해결과정 및 전략
 
 ### 한정수량 판매 상품 재고수량 동시성 제어 문제
+- 문제상황: 재고수량이 10개인 **한정세일게임** 판매시 **10,000명의 유저가 동시에 접근**하면 수량 데이터 정합성이 깨지는 문제(레이스 컨디션)가 발생했습니다.
+- 해결과정1: 비관적락을 통해 DB Lock을 설정해서 1차적 해결
+    - 추가적인 문제점: 10,000명의 유저가 **해당 마이크로서비스에서 트랜잭션 시작 및 DB 커넥션을 점유**하는 문제 발생
+    - 아이디어: 10명의 유저만 트랜잭션 시작 및 DB Lock을 점유하게 하는 것이 효율적이지 않을까?
+- 해결과정2: Redisson 분산락(글로벌락)을 통해 1차적으로 10명의 유저만 재고수량 서비스 트랜잭션을 시작할 수 있도록 개선 → 이후 10명의 요청에 DB Lock을 적용시켜 데이터 정합성 유지
+    
+    ```java
+    public ProductStockGetResponse decreaseProductStock(Long productId) {
+            // Redisson 분산락 적용(Pub,Sub)
+            RLock lock = redissonClient.getLock(String.valueOf(productId));
+            ProductStock productStock;
+            try {
+                // waitTime: 락을 기다리는 시간, leaseTime: 락 임대 시간
+                lock.tryLock(5, 3, TimeUnit.SECONDS);
+                // Lock을 획득한 요청만 트랜잭션 시작
+                productStock = stockTransactionService.decreaseByTransaction(productId);
+            } catch (InterruptedException e) {
+                throw new ApiException(ErrorCode.NO_STOCK_BY_PRODUCT_ID);
+            } finally {
+                lock.unlock();
+            }
+            return ProductStockGetResponse.from(productStock);
+        }
+    ```
+
+- 테스트 및 검증(Apache Jmeter)
+![결제진입-테스트-v2(분산락적용)](https://github.com/soonhankwon/steam-punk-be/assets/113872320/12dbbd27-d36a-461f-ab70-938e95fd8f30)
+![결제진입-테스트-v2-db](https://github.com/soonhankwon/steam-punk-be/assets/113872320/e70421a8-a0c5-4921-8474-b1d85b39784d)
+
 ---
 ### 상품결제 10,000건 동시처리시 최대 지연시간 0.5초 초과 문제 → 주요쿼리 커버링 인덱스 + 결제서버 스케일 아웃를 통해 0.363초로 개선 (개선율 36.43%)
