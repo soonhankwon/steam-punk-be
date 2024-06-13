@@ -15,6 +15,7 @@
 
 ## Table Of Contents
 - [유저스토리](#유저스토리)
+- [기술스택](#기술스택)
 - [주요기능 및 API 문서](#주요기능-및-api-문서)
 - [아키텍처](#아키텍처)
 - [ERD](#erd)
@@ -26,6 +27,25 @@
 - **위시리스트**에 상품을 등록 후 **주문** 그리고 **결제**를 통해 게임을 구매합니다.
 - 한정 판매 또는 **한정 세일 판매 이벤트** 게임을 선착순으로 구매할 수 있습니다.
 - 게임 플레이를 통해 게임을 플레이 할 수 있으며, 이력을 조회할 수 있습니다.
+
+## 기술스택
+
+|  | Tech | Usage |
+| --- | --- | --- |
+| Language | Java 21 |  |
+| Framework | SpringBoot 3.2.5 | 스프링부트 WAS |
+| Build | Gradle | 빌드툴 |
+| Database | MySQL | 관계형 데이터베이스 |
+| ORM | Spring Data JPA |  |
+| Batch | Spring Batch | Kaggle 스팀 게임 데이터 전처리 및 DB INSERT 배치 작업을 위해 사용 |
+| Cloud | Spring Cloud | Spring Eureka, API Gateway |
+| Metric | Spring Actuator | 애플리케이션 지표 수집 |
+| Libary | WebFlux | 마이크로서비스 간 통신을 위해 사용 |
+| Library | Redisson | 재고관리 서비스에서 분산락으로 활용 |
+| Library | Jmeter | 성능 및 부하 테스트 툴 |
+| Monitoring | Prometheus, Grafana | 애플리케이션 지표 시각화 및 모니터링 |
+| DevOps | Docker | WAS 및 마이크로서비스에 필요한 의존성 컨테이너 구동 |
+| VCS | Git | 버전 관리 |
 
 ## 주요기능 및 api 문서
 - [API 문서(Notion) - Click!](https://www.notion.so/API-a44f03836b054ba680ee623a725329ae?pvs=4)
