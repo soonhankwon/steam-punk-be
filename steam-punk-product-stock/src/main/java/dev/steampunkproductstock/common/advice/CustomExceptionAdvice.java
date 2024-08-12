@@ -14,6 +14,7 @@ public class CustomExceptionAdvice {
     @ExceptionHandler(ApiException.class)
     protected ResponseEntity<ErrorResponse> handleCustomException(ApiException exception) {
         ErrorCode errorCode = exception.getErrorCode();
+        System.out.println();
         log.warn(
                 String.format(
                         "http-status={%d} msg={%s}",

@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -17,7 +18,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "payment_product")
+@Table(name = "payment_product", indexes = {
+        @Index(name = "pp_payment_id_idx", columnList = "paymentId"),
+        @Index(name = "pp_product_id_idx", columnList = "productId"),
+        @Index(name = "pp_state_idx", columnList = "payment_product_state")
+})
 public class PaymentProduct extends BaseTimeEntity {
 
     @Id
