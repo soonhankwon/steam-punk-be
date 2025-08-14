@@ -9,12 +9,14 @@ import dev.steampunkproductstock.repository.ProductStockRepository;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+@Disabled("This test requires a running Redis instance and is an integration test.")
 @SpringBootTest
 class StockServiceTest {
 
